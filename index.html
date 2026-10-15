@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1A1D23">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="NeoBalance">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NeoBalance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&display=swap" rel="stylesheet">
+<style>
+/* Paleta SOM. Oscuro = referencia. Claro = inversión de roles. Botones naranja con texto oscuro. */
+:root{
+  /* claro (invertido) */
+  --bg:#F5F5F5; --surface:#F5F5F5; --ink:#1A1D23; --muted:#50555C; --line:#BFC3C8; --data:#50555C;
+  --accent:#FF6600; --num:#1A1D23; --btn-bg:#FF6600; --btn-ink:#1A1D23; --contrast:#1A1D23;
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif; --body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#1A1D23; --surface:#1A1D23; --ink:#F5F5F5; --muted:#BFC3C8; --line:#50555C; --data:#AEB4BA;
+    --num:#FF6600; --btn-bg:#FF6600; --btn-ink:#1A1D23; --contrast:#F5F5F5;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1A1D23; --surface:#1A1D23; --ink:#F5F5F5; --muted:#BFC3C8; --line:#50555C; --data:#AEB4BA;
+  --num:#FF6600; --btn-bg:#FF6600; --btn-ink:#1A1D23; --contrast:#F5F5F5;
+}
+
+/* Elección manual del usuario: atributo propio, con más especificidad que el tema del visor */
+html:root[data-app-theme="light"]{--c1:#FF6600;--c2:#1A1D23;--c3:#FFB380;--c4:#7A8088;--c5:#A84300;--c6:#BFC3C8;--c7:#4A4F56;--bg:#F5F5F5; --surface:#F5F5F5; --ink:#1A1D23; --muted:#50555C; --line:#BFC3C8; --data:#50555C; --num:#1A1D23; --contrast:#1A1D23; color-scheme:light}
+html:root[data-app-theme="dark"]{--c1:#FF6600;--c2:#F5F5F5;--c3:#C24E00;--c4:#9AA1A8;--c5:#FFB380;--c6:#3A3F46;--c7:#6E747B;--bg:#1A1D23; --surface:#1A1D23; --ink:#F5F5F5; --muted:#BFC3C8; --line:#50555C; --data:#AEB4BA; --num:#FF6600; --contrast:#F5F5F5; color-scheme:dark}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font:17px/1.5 var(--body);font-variant-numeric:tabular-nums}
+main{max-width:520px;margin:0 auto;padding:22px 18px 110px}
+h1,h2{font-family:var(--display);font-weight:700;margin:0;letter-spacing:-.01em}
+h2{font-size:1.2rem;margin:28px 0 12px}
+p{margin:0}
+.muted{color:var(--muted)}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.greet{color:var(--muted);margin-bottom:6px}
+.today-num{font-family:var(--display);font-weight:700;font-size:clamp(3.4rem,17vw,5.2rem);line-height:1;letter-spacing:-.03em;margin:4px 0 8px;color:var(--num)}
+.period{font-size:1.02rem}
+.period strong{font-weight:700}
+.runway{display:flex;gap:3px;margin:18px 0 6px;flex-wrap:wrap}
+.runway span{flex:1 1 6px;min-width:6px;height:10px;border-radius:2px;background:var(--line)}
+.runway span.now{background:var(--accent)}
+.runway-label{font-size:.88rem;color:var(--muted)}
+.howbtn{background:none;border:0;padding:0;margin-top:14px;color:var(--ink);text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:4px}
+.breakdown{margin-top:10px;border-left:1px solid var(--line);padding:4px 0 4px 14px}
+.breakdown div{display:flex;justify-content:space-between;gap:12px;padding:3px 0}
+.breakdown .total{border-top:1px solid var(--line);margin-top:4px;padding-top:7px;font-weight:700}
+
+.nudge{border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:22px}
+.nudge.warn,.nudge.away,.nudge.extra{border:3px solid var(--accent)}
+.nudge.warn p,.nudge.away h2,.nudge.extra p{font-weight:700}
+.nudge p{margin-bottom:12px}
+.nudge p:last-child{margin-bottom:0}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+
+.log{border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:24px}
+.quick{display:flex;gap:8px;margin:10px 0}
+.quick button{flex:1;padding:10px 0;border:1px solid var(--line);border-radius:10px;background:transparent}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;flex:1}
+.field label{font-size:.88rem;color:var(--muted)}
+.field input,.field select{padding:10px 12px;border:1px solid var(--line);background:transparent;min-width:0;border-radius:10px}
+.field select option{background:var(--bg);color:var(--ink)}
+.check{display:flex;gap:10px;align-items:flex-start;margin:6px 0 12px}
+.check input{width:18px;height:18px;margin-top:3px;accent-color:var(--accent)}
+.btn{padding:10px 16px;border:1px solid var(--btn-bg);background:var(--btn-bg);color:var(--btn-ink);font-weight:700;border-radius:10px}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);font-weight:400}
+.btn.small{padding:7px 12px;font-size:.9rem}
+
+.list{list-style:none;margin:0;padding:0}
+.list li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.list .meta,.meta{font-size:.86rem;color:var(--muted)}
+.list .amt{font-weight:600;white-space:nowrap}
+.empty{padding:14px 0;color:var(--muted)}
+.linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;padding:4px}
+
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav div{max-width:520px;margin:0 auto;display:flex}
+nav button{flex:1;background:none;border:0;padding:13px 2px 11px;color:var(--muted);border-top:2px solid transparent;font-size:.85rem}
+nav button[aria-current="page"]{color:var(--ink);font-weight:600;border-top-color:var(--accent)}
+textarea{width:100%;min-height:120px;padding:10px;border:1px solid var(--line);border-radius:10px;background:transparent;font:.82rem/1.4 ui-monospace,monospace;color:var(--ink)}
+.tag{display:inline-block;font-size:.78rem;font-weight:700;padding:0 8px;border:2px solid var(--accent);border-radius:999px;color:var(--ink);margin-left:6px}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.compare div{border:1px solid var(--line);border-radius:12px;padding:12px}
+.compare .best{border:3px solid var(--accent)}
+.compare strong{display:block;font-family:var(--display);font-size:1.1rem}
+.away li{align-items:flex-start}
+select.inline{padding:8px;border:1px solid var(--line);border-radius:10px;background:transparent}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.bar{height:8px;border-radius:4px;background:var(--contrast);margin:6px 0 4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:4px}
+.list li.over{border-left:5px solid var(--accent);padding-left:12px}
+.list li.over .meta{font-weight:700;color:var(--ink)}
+.seg{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 6px}
+.seg button{padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:transparent;font-size:.92rem}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#1A1D23;font-weight:700}
+details.faq{border-bottom:1px solid var(--line);padding:10px 0}
+details.faq summary{cursor:pointer;font-weight:700;list-style-position:outside}
+details.faq summary::marker{color:var(--accent)}
+details.faq p{margin-top:6px;color:var(--muted)}
+
+:root{--c1:#FF6600;--c2:#1A1D23;--c3:#FFB380;--c4:#7A8088;--c5:#A84300;--c6:#BFC3C8;--c7:#4A4F56;}
+@media (prefers-color-scheme:dark){:root:not([data-app-theme="light"]){--c1:#FF6600;--c2:#F5F5F5;--c3:#C24E00;--c4:#9AA1A8;--c5:#FFB380;--c6:#3A3F46;--c7:#6E747B;}}
+.donut{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:center;margin-top:8px}
+@media (max-width:360px){.donut{grid-template-columns:1fr}}
+.donut svg{width:150px;height:150px;display:block}
+.donut circle.seg2{cursor:default}
+.legend{list-style:none;margin:0;padding:0}
+.legend li{display:grid;grid-template-columns:12px 1fr auto;gap:8px;align-items:baseline;padding:4px 0;font-size:.92rem}
+.legend .sw{width:12px;height:12px;border-radius:3px;align-self:center}
+.legend .pc{font-weight:700;text-align:right;white-space:nowrap}
+.legend .am{grid-column:2 / 4;font-size:.84rem;color:var(--muted);margin-top:-4px}
+.mnav{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.mnav button{border:1px solid var(--line);background:transparent;border-radius:10px;width:40px;height:40px;font-size:1.2rem}
+.mnav button:disabled{opacity:.3;cursor:default}
+.wordmark{font-family:var(--display);font-weight:700;font-size:1.05rem;letter-spacing:-.01em;margin:-4px 0 18px;color:var(--ink)}
+.wordmark span{color:var(--accent)}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<nav aria-label="Secciones"><div id="nav"></div></nav>
+<script>
+/* ======================= CONFIG ======================= */
+const DEMO = false;          // true en la versión demo pública
+const DEMO_LIMIT = 40;       // gastos que se pueden apuntar en la demo
+const AWAY_DAYS = 5;         // días sin abrir para mostrar "Mientras estabas fuera"
+
+/* ======================= VARIANTES ======================= */
+const LANGS = {
+  es: { locale:"es-ES", name:"Español", W:{bill:"recibo",bills:"recibos",Bills:"Recibos",pay:"nómina",Pay:"Nómina"} },
+  en: { locale:"en-US", name:"English", W:{bill:"bill",bills:"bills",Bills:"Bills",pay:"paycheck",Pay:"Paycheck"} }
+};
+const CURRENCIES = { EUR:{sym:"€",name:"Euro (€)"}, USD:{sym:"$",name:"Dólar / Dollar ($)"}, GBP:{sym:"£",name:"Libra / Pound (£)"}, MXN:{sym:"$",name:"Peso MX ($)"} };
+const CAT_KEYS = ["food","transport","home","leisure","health","other"];
+const CAT_LEGACY = {"Comida":"food","Transporte":"transport","Hogar":"home","Ocio":"leisure","Salud":"health","Otros":"other",
+  "Food":"food","Transport":"transport","Home":"home","Leisure":"leisure","Health":"health","Other":"other"};
+function makeT(lang){
+  const W=LANGS[lang].W;
+  if(lang==="en") return {
+    tabs:{hoy:"Today",gastos:"Spending",ingresos:"Income",mes:"Month",ajustes:"Settings"},
+    gsub:{dia:"Day to day",recibos:"Bills",subs:"Subscriptions",deudas:"Debts"},
+    greet:["Good morning","Good afternoon","Good evening"],
+    todayLabel:"Safe to spend today",
+    untilPay:(amt,date,days)=>`<strong>${amt}</strong> until ${date} · ${days} ${days===1?"day":"days"}`,
+    belowPay:(amt,date)=>`You're <strong>${amt}</strong> short until ${date}. Nothing dramatic: check the breakdown and decide what to move.`,
+    runway:d=>`Each mark is one day until your next paycheck (${d})`,
+    how:"How is this worked out?",hide:"Hide breakdown",daysWord:n=>n===1?"day":"days",
+    bd:{balance:"Balance in your spending accounts",pending:"Bills and debts before payday",reserve:"Set aside for non-monthly bills",cushion:"Safety margin",aside:"Money set aside",total:"Available until payday"},
+    logTitle:"Log a spend",amount:"Amount",category:"Category",note:"Note (optional)",save:"Log it",
+    cats:{food:"Food",transport:"Transport",home:"Home",leisure:"Leisure",health:"Health",other:"Other",unlogged:"Unlogged"},
+    recent:"Recent spending",noSpends:"No spending logged yet. The first one takes five seconds.",
+    demoLimit:`You've reached the demo limit (${DEMO_LIMIT} spends). Everything you logged is still here.`,
+    undo:"Delete",
+    extraNudge:(amt,name)=>`“${name}” (${amt}) has arrived and is already added to your available money. Want to set part of it aside?`,
+    asideHalf:"Set aside half",asideAll:"Set aside all",keep:"Keep it available",
+    overdue:"Your paycheck should have arrived by now. When it does, mark it in Income.",
+    awayTitle:d=>`It's been ${d} days. Let's catch up in a minute.`,
+    awayBills:"Bills and payments that were due meanwhile",awayInc:"Income you were expecting",
+    awayBal:"How much is in the account now?",awayDone:"Done, I'm up to date",awayFresh:"Or start fresh from today (just update the balance)",
+    awaySkip:"No",yes:"Yes",paidQ:"did you pay them?",arrivedQ:"did they arrive?",dismiss:"Not now",
+    billsTitle:"Bills and payments",billsHint:"Non-monthly bills can be spread out: the app sets a little aside each month so they never catch you off guard.",
+    addBill:"Add bill",editBill:"Save changes",name:"Name",every:"How often",nextDate:"Next date",
+    prorate:"Set a little aside each month (recommended if it isn't monthly)",
+    freqBill:{1:"Monthly",2:"Every 2 months",3:"Quarterly",6:"Every 6 months",12:"Yearly",0:"Just once"},
+    paid:"Paid",edit:"Edit",del:"Delete",sure:"Sure? Yes, delete",cancel:"Cancel",
+    noBills:"Add your first bill: rent, electricity, insurance…",prorating:m=>`setting aside ${m} a month`,late:"Overdue",upcoming:"Upcoming",
+    incomeTitle:"Income",incomeHint:"Only your paycheck marks the end of each period. Other income, recurring or one-off, is added to your available money when you mark it as received.",
+    isPay:"This is my paycheck (marks the end of each period)",payTag:"sets the period",noPay:"Mark one of your incomes as your paycheck so the app knows how far ahead to calculate.",
+    addIncome:"Add income",freqInc:{monthly:"Monthly",biweekly:"Every 2 weeks",semimonthly:"Twice a month (1st and 15th)",weekly:"Weekly",once:"Just once (bonus, refund…)"},
+    received:"Received",noIncome:"Add your paycheck so the app knows when each period starts.",
+    debtTitle:"Debts",debtHint:"Minimum payments count against your available money. Here you can see when you'd be debt-free and which order saves you more.",
+    addDebt:"Add debt",debtBal:"What you owe now",debtRate:"Annual interest (%)",debtMin:"Minimum monthly payment",
+    extraMonth:"I can also pay each month",extraPay:"Record an extra payment",which:"Debt",register:"Record",minLbl:"minimum",
+    snowball:"Snowball",snowballSub:"Smallest balance first",avalanche:"Avalanche",avalancheSub:"Highest interest first",
+    freeOn:d=>`Debt-free in ${d}`,interest:x=>`${x} in interest`,cheaper:"Cheaper",never:"With these payments you'd never finish: interest outgrows what you pay. Raise the extra payment.",
+    estimate:"This is an estimate: your lender may calculate differently.",noDebts:"No debts recorded. If you have loans or cards, add them here rather than under bills.",
+    minPaid:"Minimum paid",
+    settingsTitle:"Settings",balance:"Current account balance",balanceHint:"Copy it from your banking app whenever you like. Everything is calculated from it.",
+    cushion:"Safety margin",aside:"Money set aside",update:"Save",
+    language:"Language",currency:"Currency",currencyHint:"Changes the symbol only. It doesn't convert your amounts.",
+    backup:"Backup",backupHint:"Copy this text and keep it somewhere safe (notes, an email to yourself). To restore, paste it and tap “Restore”.",
+    copy:"Copy",restore:"Restore",copied:"Copied",restored:"Data restored",badData:"That text isn't a valid backup.",
+    dataTitle:"Data",example:"Load example data",empty:"Start empty",emptySure:"Sure? Everything will be erased",
+    demoBanner:"You're looking at example numbers. Whenever you're ready, start with your own in Settings.",
+    theme:"Theme",themes:{auto:"Automatic",light:"Light",dark:"Dark"},
+    mesTitle:m=>m.charAt(0).toUpperCase()+m.slice(1),
+    forecast:amt=>`At this pace you'll end the month with <strong>${amt}</strong> in the account.`,
+    forecastNeg:amt=>`At this pace you'd end the month <strong>${amt}</strong> short. There's still room to adjust.`,
+    forecastNote:"Includes what's still to come in and go out this month, plus your daily spending pace.",
+    inM:"Came in",fixedM:"Bills and debts paid",varM:"Day-to-day spending",savedM:"Left over",rate:"Savings rate",
+    byCat:"By category",limitHint:"Only set a limit where it helps. If you go over, the app tells you, no drama.",
+    limit:"Limit",saveLimits:"Save limits",over:x=>`over by ${x}`,left:x=>`${x} left`,noLimit:"no limit",
+    evo:"Last 6 months",evoIn:"Income",evoOut:"Spending",
+    insights:"Observations",noInsights:"After a couple of weeks of logging, observations about your month will show up here.",
+    insMore:(cat,p)=>p>=100?`You're on track to spend more than double your average on ${cat.toLowerCase()}.`:`You're on track to spend ${p}% more on ${cat.toLowerCase()} than your recent average.`,
+    insLess:(cat,p)=>`${cat} is running ${p}% below your average. Good margin.`,
+    insOver:(cat,x)=>`You've gone over your ${cat.toLowerCase()} limit by ${x}.`,
+    insRate:(a,b)=>`Your savings rate is at ${a}%, versus ${b}% last month.`,
+    insNeg:"If you keep this pace, you'd end the month in the red. See which category you can slow down.",
+    accTitle:"Accounts",accHint:"Up to three accounts. Name them however you like: the real name, a nickname, “Savings”, “Kids”… Only ticked ones count towards what you can spend.",
+    accName:"Account name",accBal:"Balance",accSpend:"Counts towards what I can spend",accAdd:"Add account",accSave:"Save accounts",accMax:"Three accounts maximum.",
+    notCounted:"not counted",account:"Account",awayAcc:n=>`How much is in “${n}” now?`,defAcc:"Main account",accN:n=>`Account ${n}`,
+    histBtn:n=>`See all spending (${n})`,histTitle:"Your spending",histBack:"Back to Today",allMonths:"All months",allCats:"All categories",allAcc:"All accounts",monthLbl:"Month",
+    histTotal:(n,x)=>`${n} ${n===1?"spend":"spends"} · ${x}`,histEmpty:"No spending matches these filters.",
+    histWhere:"Your spending is stored only on this device, inside the browser. Nothing is sent to any server. If you clear browser data or change phones, it's gone: make a backup in Settings now and then.",
+    csv:"Export to spreadsheet (CSV)",csvHint:"Copy this text and paste it into Excel, Numbers or Google Sheets.",csvHead:"date,amount,category,note,account",csvSep:",",decComma:false,
+    editSpend:"Edit spend",date:"Date",
+    subsHint:"Streaming, music, apps, gym… the small things that repeat. Here you see what they really add up to and decide what to cut.",
+    subsMonth:"Per month",subsYear:"Per year",subsCount:n=>`${n} ${n===1?"subscription":"subscriptions"}`,
+    addSub:"Add subscription",trialEnd:"Free trial ends (optional)",trialTag:d=>`trial until ${d}`,
+    cancelled:"Cancelled",cancelSaved:x=>`Subscription cancelled. You save ${x} a year.`,
+    noSubs:"Add your subscriptions: streaming, music, apps, cloud storage, gym…",monthlyEq:x=>`${x} a month`,
+    trialNudge:(n,d,a)=>`The free trial of “${n}” ends on ${d}. After that you'll be charged ${a}. Keep it?`,keepSub:"Keep it",cancelSub:"Cancel it",
+    freqSub:{1:"Monthly",3:"Quarterly",6:"Every 6 months",12:"Yearly"},
+    recon:"Match balance with bank",reconTitle:"Match your balance with the bank",reconHint:"Type what your banking app shows. Leave blank any account you don't want to touch.",
+    reconExpect:x=>`The app expected ${x}`,reconUnlogged:"Record negative differences as “Unlogged” spending",reconDo:"Match balance",
+    reconOk:"Everything matched. Nothing to adjust.",reconResult:(neg,pos)=>`Balance matched.${neg?` ${neg} slipped through unlogged.`:""}${pos?` There was ${pos} extra (refunds or unlogged income).`:""}`,
+    reconPay:"You've just been paid: a good moment to match your balance with the bank.",reconOld:d=>`It's been ${d} days since you last matched your balance with the bank.`,
+    reconWeek:"Weekly check-in: match your balance with the bank.",reconWeekly:"Remind me to match my balance every week",reconNow:"Match now",reconLater:"Not now",
+    adjustIn:"Adjustment in your favour",insUnlogged:x=>`This month ${x} slipped through without being logged.`,
+    help:{btn:"Help",link:"Questions? Open Help",back:"Back to Settings",title:"NeoBalance Help",
+      intro:"The app tells you every day how much you can safely spend without putting your bills, debts or set-aside money at risk. It isn't connected to your bank and it isn't financial advice.",
+      startT:"Getting started",start:["Settings → Data → “Start empty”.","Settings → choose your language and currency.","Settings → Accounts: enter your real balances. Tick only the accounts you spend from.","Income → add your paycheck and tick “This is my paycheck”.","Spending → add your bills, subscriptions and debts. For non-monthly bills, turn on “Set a little aside each month”.","Today → log your first spend."],
+      numT:"Your number",num:"“Safe to spend today” = (spending balance − bills and debts before payday − money set aside for yearly bills − safety margin − money set aside) ÷ days until payday. Tap “How is this worked out?” on Today to see every figure.",
+      faqT:"Frequently asked questions",
+      faq:[["Do I need to connect my bank?","No. You enter balances and transactions yourself."],
+        ["Why did my number go down if I didn't spend?","A bill or debt payment is coming up, or the app is setting money aside for a yearly bill. Check “How is this worked out?”."],
+        ["Which income sets the period?","Only the one marked as your paycheck. Others are added when you mark them “Received”."],
+        ["What do I do with a bonus?","Add it in Income as “Just once”. When received, the app asks whether to set part of it aside."],
+        ["The app's balance doesn't match my bank.","That's normal. Use “Match balance with bank”. Differences are recorded as “Unlogged” spending or an adjustment."],
+        ["How do I fix a wrong spend?","Spending → Day to day → Edit or Delete. The balance corrects itself."],
+        ["Does my data sync between devices?","No. Use Settings → Backup → Copy, then Restore on the other device."],
+        ["Where is my data stored?","Only in this browser, on this device. Clearing browser data or private mode can erase it. Back up regularly."],
+        ["I move the money for yearly bills to another account. What do I do?","In that bill or subscription, under “Where do you keep the money set aside?”, choose that account. The app stops deducting it from your available money, and when matching your balance it tells you how much should be there."],
+        ["Does changing currency convert amounts?","No, it only changes the symbol."],
+        ["Will I be notified when a free trial ends?","There are no notifications. A warning shows on Today during the 3 days before."]],
+      more:"The full user guide and support contact come with your purchase.",
+      legal:"Personal organisation tool. Not financial, tax, legal or investment advice. Calculations are estimates based on the data you enter."},
+    whereRes:"Where do you keep the money set aside?",whereVirtual:"In my spending account (the app sets it aside without moving it)",
+    whereHint:"If you move this money to another account every month, choose it: the app will stop deducting it from your available money.",
+    resIn:n=>`kept in “${n}”`,resIncl:x=>`includes ${x} set aside`,
+    reconReserved:x=>`Of this balance, ${x} is set aside for non-monthly bills.`,reconShould:x=>`You should have at least ${x} here for what's set aside.`,
+    reserveShort:(n,x)=>`The reserve in “${n}” is short by ${x}.`,
+    mview:{mes:"Month",ano:"Year"},prevM:"Previous",nextM:"Next",ytd:y=>`${y} · year to date`,fullYear:y=>`${y}`,
+    dataSince:d=>`Data since ${d}. Earlier months don't count.`,closed:"Closed month",
+    destTitle:"Where your income went",destBills:"Bills and debts",destSubs:"Subscriptions",destVar:"Day to day",destSaved:"Saved",
+    destIn:"came in",destOut:"went out",destOver:x=>`You spent ${x} more than came in.`,destNone:"No income recorded in this period.",
+    catTitle:"Day-to-day spending by category",catTotal:"spent",catNone:"No day-to-day spending recorded.",
+    yrMonths:"Month by month",yrSubs:"Subscriptions paid",yrSubsHint:"Only charges marked as paid in the app.",
+    yrComp:(y,a,b,c)=>`Same period in ${y}: ${a} came in, ${b} went out, savings rate ${c}.`,
+    savedMsg:"Saved",invalid:"Check the name, amount and date."
+  };
+  return {
+    tabs:{hoy:"Hoy",gastos:"Gastos",ingresos:"Ingresos",mes:"Mes",ajustes:"Ajustes"},
+    gsub:{dia:"Día a día",recibos:W.Bills,subs:"Suscripciones",deudas:"Deudas"},
+    greet:["Buenos días","Buenas tardes","Buenas noches"],
+    todayLabel:"Puedes gastar hoy",
+    untilPay:(amt,date,days)=>`<strong>${amt}</strong> hasta el ${date} · ${days} ${days===1?"día":"días"}`,
+    belowPay:(amt,date)=>`Vas <strong>${amt}</strong> por debajo hasta el ${date}. Nada grave: mira el desglose y decide qué mover.`,
+    runway:d=>`Cada marca es un día hasta tu próximo cobro de nómina (${d})`,
+    how:"Cómo se calcula",hide:"Ocultar cálculo",daysWord:n=>n===1?"día":"días",
+    bd:{balance:"Saldo en tus cuentas de gasto",pending:`${W.Bills} y deudas antes del cobro`,reserve:"Reserva para gastos no mensuales",cushion:"Colchón de seguridad",aside:"Dinero apartado",total:"Disponible hasta el cobro"},
+    logTitle:"Apuntar un gasto",amount:"Importe",category:"Categoría",note:"Nota (opcional)",save:"Apuntar",
+    cats:{food:"Comida",transport:"Transporte",home:"Hogar",leisure:"Ocio",health:"Salud",other:"Otros",unlogged:"Sin apuntar"},
+    recent:"Últimos gastos",noSpends:"Aún no has apuntado gastos. El primero tarda cinco segundos.",
+    demoLimit:`Has llegado al límite de la demo (${DEMO_LIMIT} gastos). Todo lo que has apuntado sigue aquí.`,
+    undo:"Borrar",
+    extraNudge:(amt,name)=>`Ha entrado «${name}» (${amt}) y ya está sumado a tu disponible. ¿Quieres apartar una parte?`,
+    asideHalf:"Apartar la mitad",asideAll:"Apartar todo",keep:"Dejarlo disponible",
+    overdue:`Tu ${W.pay} ya debería haber llegado. Cuando la cobres, márcala en Ingresos.`,
+    awayTitle:d=>`Han pasado ${d} días. Pongámonos al día en un minuto.`,
+    awayBills:`${W.Bills} y pagos que vencían mientras tanto`,awayInc:"Ingresos que esperabas",
+    awayBal:"¿Cuánto tienes ahora en la cuenta?",awayDone:"Listo, ya estoy al día",awayFresh:"O empezar de cero desde hoy (solo actualizo el saldo)",
+    awaySkip:"No",yes:"Sí",paidQ:"¿los pagaste?",arrivedQ:"¿llegaron?",dismiss:"Ahora no",
+    billsTitle:`${W.Bills} y pagos`,billsHint:`Los ${W.bills} que no son mensuales pueden prorratearse: la app aparta un poco cada mes para que no te pillen por sorpresa.`,
+    addBill:`Añadir ${W.bill}`,editBill:`Guardar cambios`,name:"Nombre",every:"Cada cuánto",nextDate:"Próxima fecha",
+    prorate:"Apartar un poco cada mes (recomendado si no es mensual)",
+    freqBill:{1:"Mensual",2:"Cada 2 meses",3:"Trimestral",6:"Semestral",12:"Anual",0:"Solo una vez"},
+    paid:"Pagado",edit:"Editar",del:"Eliminar",sure:"¿Seguro? Sí, eliminar",cancel:"Cancelar",
+    noBills:`Añade tu primer ${W.bill}: alquiler, luz, seguro…`,prorating:m=>`apartando ${m} al mes`,late:"Vencido",upcoming:"Próximos",
+    incomeTitle:"Ingresos",incomeHint:`Solo tu ${W.pay} marca el final de cada periodo. El resto de ingresos, recurrentes o puntuales, se suman a tu disponible cuando los marcas como cobrados.`,isPay:`Es mi ${W.pay} (marca el final de cada periodo)`,payTag:"marca el periodo",noPay:`Marca uno de tus ingresos como ${W.pay} para que la app sepa hasta cuándo calcular.`,
+    addIncome:"Añadir ingreso",freqInc:{monthly:"Mensual",biweekly:"Cada 2 semanas",semimonthly:"Dos veces al mes (días 1 y 15)",weekly:"Semanal",once:"Solo una vez (paga extra, devolución…)"},
+    received:"Cobrado",noIncome:`Añade tu ${W.pay} para que la app sepa cuándo empieza cada periodo.`,
+    debtTitle:"Deudas",debtHint:"Los pagos mínimos cuentan en tu disponible. Aquí ves cuándo quedarías libre de deudas y qué orden te ahorra más.",
+    addDebt:"Añadir deuda",debtBal:"Lo que debes ahora",debtRate:"Interés anual (%)",debtMin:"Pago mínimo mensual",
+    extraMonth:"Puedo pagar además cada mes",extraPay:"Registrar un pago extra",which:"Deuda",register:"Registrar",minLbl:"mínimo",
+    snowball:"Bola de nieve",snowballSub:"La más pequeña primero",avalanche:"Avalancha",avalancheSub:"El interés más alto primero",
+    freeOn:d=>`Libre de deudas en ${d}`,interest:x=>`${x} en intereses`,cheaper:"Más barato",never:"Con estos pagos no terminarías nunca: el interés supera lo que pagas. Sube el pago extra.",
+    estimate:"Es una estimación: tu banco puede calcular distinto.",noDebts:"Sin deudas registradas. Si tienes préstamos o tarjetas, añádelos aquí en lugar de en recibos.",
+    minPaid:"Mínimo pagado",
+    settingsTitle:"Ajustes",balance:"Saldo actual en tu cuenta",balanceHint:"Cópialo de tu app del banco cuando quieras. Es la base de todo el cálculo.",
+    cushion:"Colchón de seguridad",aside:"Dinero apartado",update:"Guardar",
+    language:"Idioma",currency:"Moneda",currencyHint:"Solo cambia el símbolo. No convierte tus importes.",
+    backup:"Copia de seguridad",backupHint:"Copia este texto y guárdalo en un lugar seguro (notas, email a ti mismo). Para restaurar, pégalo y pulsa «Restaurar».",
+    copy:"Copiar",restore:"Restaurar",copied:"Copiado",restored:"Datos restaurados",badData:"Ese texto no es una copia válida.",
+    dataTitle:"Datos",example:"Cargar datos de ejemplo",empty:"Empezar vacío",emptySure:"¿Seguro? Se borrará todo",
+    demoBanner:"Estás viendo números de ejemplo. Cuando quieras, empieza con los tuyos en Ajustes.",
+    theme:"Tema",themes:{auto:"Automático",light:"Claro",dark:"Oscuro"},
+    mesTitle:m=>m.charAt(0).toUpperCase()+m.slice(1),
+    forecast:amt=>`A este ritmo terminarás el mes con <strong>${amt}</strong> en la cuenta.`,
+    forecastNeg:amt=>`A este ritmo terminarías el mes <strong>${amt}</strong> por debajo. Aún hay margen para ajustar.`,
+    forecastNote:"Incluye lo que queda por cobrar y pagar este mes y tu ritmo de gasto diario.",
+    inM:"Ha entrado",fixedM:`${W.Bills} y deudas pagados`,varM:"Gastos del día a día",savedM:"Te ha quedado",rate:"Tasa de ahorro",
+    byCat:"Por categoría",limitHint:"Pon un límite solo donde te ayude. Si te pasas, la app te lo dice sin dramas.",
+    limit:"Límite",saveLimits:"Guardar límites",over:x=>`te has pasado ${x}`,left:x=>`quedan ${x}`,noLimit:"sin límite",
+    evo:"Últimos 6 meses",evoIn:"Ingresos",evoOut:"Gastos",
+    insights:"Observaciones",noInsights:"Cuando lleves un par de semanas apuntando gastos, aquí aparecerán observaciones sobre tu mes.",
+    insMore:(cat,p)=>p>=100?`Vas camino de gastar más del doble de tu media en ${cat.toLowerCase()}.`:`Vas camino de gastar un ${p} % más en ${cat.toLowerCase()} que tu media de los meses anteriores.`,
+    insLess:(cat,p)=>`En ${cat.toLowerCase()} vas un ${p} % por debajo de tu media. Buen margen.`,
+    insOver:(cat,x)=>`Has superado el límite de ${cat.toLowerCase()} en ${x}.`,
+    insRate:(a,b)=>`Tu tasa de ahorro va por el ${a} %, frente al ${b} % del mes pasado.`,
+    insNeg:"Si sigues al ritmo actual, cerrarías el mes en negativo. Mira qué categoría puedes frenar.",
+    accTitle:"Cuentas",accHint:"Hasta tres cuentas. Ponles el nombre que quieras: el real, un apodo, «Ahorro», «Niños»… Solo las marcadas cuentan para lo que puedes gastar.",
+    accName:"Nombre de la cuenta",accBal:"Saldo",accSpend:"Cuenta para lo que puedo gastar",accAdd:"Añadir cuenta",accSave:"Guardar cuentas",accMax:"Máximo tres cuentas.",
+    notCounted:"no cuenta",account:"Cuenta",awayAcc:n=>`¿Cuánto tienes ahora en «${n}»?`,defAcc:"Cuenta principal",accN:n=>`Cuenta ${n}`,
+    histBtn:n=>`Ver todos los gastos (${n})`,histTitle:"Tus gastos",histBack:"Volver a Hoy",allMonths:"Todos los meses",allCats:"Todas las categorías",allAcc:"Todas las cuentas",monthLbl:"Mes",
+    histTotal:(n,x)=>`${n} ${n===1?"gasto":"gastos"} · ${x}`,histEmpty:"No hay gastos con estos filtros.",
+    histWhere:"Tus gastos se guardan solo en este dispositivo, dentro del navegador. No se envían a ningún servidor. Si borras los datos del navegador o cambias de móvil, se pierden: haz una copia de seguridad en Ajustes de vez en cuando.",
+    csv:"Exportar a hoja de cálculo (CSV)",csvHint:"Copia este texto y pégalo en Excel, Numbers o Google Sheets.",csvHead:"fecha;importe;categoria;nota;cuenta",csvSep:";",decComma:true,
+    editSpend:"Editar gasto",date:"Fecha",
+    subsHint:"Plataformas, música, apps, gimnasio… Lo pequeño que se repite. Aquí ves cuánto suman de verdad y decides qué cortar.",
+    subsMonth:"Al mes",subsYear:"Al año",subsCount:n=>`${n} ${n===1?"suscripción":"suscripciones"}`,
+    addSub:"Añadir suscripción",trialEnd:"Fin del periodo de prueba (opcional)",trialTag:d=>`prueba hasta el ${d}`,
+    cancelled:"Cancelada",cancelSaved:x=>`Suscripción cancelada. Te ahorras ${x} al año.`,
+    noSubs:"Añade tus suscripciones: plataformas, música, apps, nube, gimnasio…",monthlyEq:x=>`${x} al mes`,
+    trialNudge:(n,d,a)=>`La prueba de «${n}» termina el ${d}. A partir de ahí te cobrarán ${a}. ¿La mantienes?`,keepSub:"Mantenerla",cancelSub:"Cancelarla",
+    freqSub:{1:"Mensual",3:"Trimestral",6:"Semestral",12:"Anual"},
+    recon:"Cuadrar saldo con el banco",reconTitle:"Cuadrar el saldo con el banco",reconHint:"Escribe lo que ves en tu app del banco. Deja en blanco las cuentas que no quieras tocar.",
+    reconExpect:x=>`La app esperaba ${x}`,reconUnlogged:"Registrar las diferencias negativas como gasto «Sin apuntar»",reconDo:"Cuadrar saldo",
+    reconOk:"Todo cuadraba. Nada que ajustar.",reconResult:(neg,pos)=>`Saldo cuadrado.${neg?` Se te escaparon ${neg} sin apuntar.`:""}${pos?` Había ${pos} de más (devoluciones o ingresos no anotados).`:""}`,
+    reconPay:"Acabas de cobrar: buen momento para cuadrar el saldo con el banco.",reconOld:d=>`Hace ${d} días que no cuadras el saldo con el banco.`,
+    reconWeek:"Toca el repaso semanal: cuadra el saldo con el banco.",reconWeekly:"Recordarme cuadrar el saldo cada semana",reconNow:"Cuadrar ahora",reconLater:"Ahora no",
+    adjustIn:"Ajuste a favor",insUnlogged:x=>`Este mes se te han escapado ${x} sin apuntar.`,
+    help:{btn:"Ayuda",link:"¿Dudas? Abre la Ayuda",back:"Volver a Ajustes",title:"Ayuda de NeoBalance",
+      intro:"La app te dice cada día cuánto puedes gastar sin comprometer tus recibos, tus deudas ni lo que necesitas apartar. No está conectada a tu banco y no es asesoramiento financiero.",
+      startT:"Primeros pasos",start:["Ajustes → Datos → «Empezar vacío».","Ajustes → elige idioma y moneda.","Ajustes → Cuentas: escribe tus saldos reales. Marca solo las cuentas de las que gastas.","Ingresos → añade tu nómina y marca «Es mi nómina».","Gastos → añade tus recibos, suscripciones y deudas. En los que no son mensuales, activa «Apartar un poco cada mes».","Hoy → apunta tu primer gasto."],
+      numT:"Tu número",num:"«Puedes gastar hoy» = (saldo de tus cuentas de gasto − recibos y deudas antes del cobro − reserva para gastos no mensuales − colchón − dinero apartado) ÷ días hasta la nómina. Pulsa «Cómo se calcula» en Hoy para ver cada cifra.",
+      faqT:"Preguntas frecuentes",
+      faq:[["¿Tengo que conectar mi banco?","No. Los saldos y movimientos los introduces tú."],
+        ["¿Por qué ha bajado mi número si no he gastado?","Se acerca un recibo o una cuota, o la app está apartando para un gasto anual. Míralo en «Cómo se calcula»."],
+        ["¿Qué ingreso marca el periodo?","Solo el que marques como nómina. Los demás se suman al marcarlos como «Cobrado»."],
+        ["¿Qué hago con la paga extra?","Añádela en Ingresos como «Solo una vez». Al cobrarla, la app te pregunta si quieres apartar una parte."],
+        ["El saldo de la app no coincide con el del banco.","Es normal. Usa «Cuadrar saldo con el banco». La diferencia se registra como gasto «Sin apuntar» o como ajuste."],
+        ["¿Cómo corrijo un gasto mal apuntado?","Gastos → Día a día → Editar o Borrar. El saldo se corrige solo."],
+        ["¿Se sincronizan mis datos entre dispositivos?","No. Usa Ajustes → Copia de seguridad → Copiar, y Restaurar en el otro dispositivo."],
+        ["¿Dónde se guardan mis datos?","Solo en este navegador, en este dispositivo. Borrar los datos del navegador o el modo privado pueden eliminarlos. Haz copias a menudo."],
+        ["Paso el dinero de los gastos anuales a otra cuenta. ¿Qué hago?","En ese recibo o suscripción, en «¿Dónde guardas lo apartado?», elige esa cuenta. La app deja de restarlo de tu disponible y, al cuadrar, te dice cuánto debería haber en ella."],
+        ["¿Cambiar la moneda convierte los importes?","No, solo cambia el símbolo."],
+        ["¿Me avisa cuando termina una prueba gratuita?","No hay notificaciones. El aviso aparece en Hoy los 3 días anteriores."]],
+      more:"El manual completo y el contacto de soporte se incluyen con tu compra.",
+      legal:"Herramienta de organización personal. No es asesoramiento financiero, fiscal, legal ni de inversión. Los cálculos son estimaciones basadas en los datos que introduces."},
+    whereRes:"¿Dónde guardas lo apartado?",whereVirtual:"En mi cuenta de gasto (la app lo aparta sin moverlo)",
+    whereHint:"Si cada mes pasas este dinero a otra cuenta, elígela: la app dejará de restarlo de tu disponible.",
+    resIn:n=>`apartado en «${n}»`,resIncl:x=>`incluye ${x} apartados`,
+    reconReserved:x=>`De este saldo, ${x} están reservados para gastos no mensuales.`,reconShould:x=>`Deberías tener al menos ${x} aquí para lo apartado.`,
+    reserveShort:(n,x)=>`La reserva de «${n}» está incompleta: faltan ${x}.`,
+    mview:{mes:"Mes",ano:"Año"},prevM:"Anterior",nextM:"Siguiente",ytd:y=>`${y} · hasta hoy`,fullYear:y=>`${y}`,
+    dataSince:d=>`Datos desde el ${d}. Lo anterior no está registrado.`,closed:"Mes cerrado",
+    destTitle:"A dónde fue lo que entró",destBills:"Recibos y deudas",destSubs:"Suscripciones",destVar:"Día a día",destSaved:"Ahorrado",
+    destIn:"entró",destOut:"salió",destOver:x=>`Gastaste ${x} más de lo que entró.`,destNone:"No hay ingresos registrados en este periodo.",
+    catTitle:"Gastos del día a día por categoría",catTotal:"gastado",catNone:"No hay gastos del día a día registrados.",
+    yrMonths:"Mes a mes",yrSubs:"Suscripciones pagadas",yrSubsHint:"Solo los cargos marcados como pagados en la app.",
+    yrComp:(y,a,b,c)=>`Mismo periodo de ${y}: entraron ${a}, salieron ${b}, tasa de ahorro ${c}.`,
+    savedMsg:"Guardado",invalid:"Revisa el nombre, el importe y la fecha."
+  };
+}
+
+/* ======================= UTILIDADES ======================= */
+const pad=n=>String(n).padStart(2,"0");
+const toStr=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const toDate=s=>{const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d,12);};
+const todayStr=()=>toStr(new Date());
+const addDays=(s,n)=>{const d=toDate(s);d.setDate(d.getDate()+n);return toStr(d);};
+const addMonths=(s,n)=>{const [y,m,d]=s.split("-").map(Number);const t=new Date(y,m-1+n,1,12);const last=new Date(t.getFullYear(),t.getMonth()+1,0).getDate();t.setDate(Math.min(d,last));return toStr(t);};
+const daysBetween=(a,b)=>Math.round((toDate(b)-toDate(a))/86400000);
+const uid=()=>Math.random().toString(36).slice(2,10);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let V,T,money,niceDate,monthYear;
+function setLang(){
+  const L=LANGS[S.lang]||LANGS.es, C=CURRENCIES[S.currency]||CURRENCIES.EUR;
+  T=makeT(S.lang in LANGS?S.lang:"es");
+  V={locale:L.locale,sym:C.sym,quick:[5,10,20,50]};
+  document.documentElement.lang=S.lang;
+  money=n=>new Intl.NumberFormat(L.locale,{style:"currency",currency:S.currency}).format(n);
+  niceDate=s=>toDate(s).toLocaleDateString(L.locale,{day:"numeric",month:"long"});
+  monthYear=s=>toDate(s).toLocaleDateString(L.locale,{month:"long",year:"numeric"});
+}
+const catName=k=>(T.cats[k]||k);
+function nextIncomeDate(i){
+  if(i.freq==="monthly") return addMonths(i.next,1);
+  if(i.freq==="biweekly") return addDays(i.next,14);
+  if(i.freq==="weekly") return addDays(i.next,7);
+  if(i.freq==="semimonthly"){ const d=toDate(i.next); return d.getDate()<15 ? toStr(new Date(d.getFullYear(),d.getMonth(),15,12)) : toStr(new Date(d.getFullYear(),d.getMonth()+1,1,12)); }
+  return null;
+}
+
+/* ======================= ESTADO ======================= */
+const KEY="calma-v0";
+function exampleState(lang,currency){
+  const t=todayStr(), en=lang==="en";
+  const N=en?{main:"Main account",sav:"Savings",kids:"Kids' fund",pay:"Paycheck",side:"Side income",extra:"Holiday bonus",
+      elec:"Electricity",net:"Internet & phone",s1:"Streaming platform",s2:"Music",s3:"Cloud storage",s4:"Language app",rent:"Rent",ins:"Car insurance",tax:"Property tax",loan:"Car loan",card:"Credit card"}
+    :{main:"Cuenta principal",sav:"Ahorro",kids:"Hucha de los niños",pay:"Nómina",side:"Alquiler de la plaza de garaje",extra:"Paga extra de diciembre",
+      elec:"Luz",net:"Internet y móvil",s1:"Plataforma de streaming",s2:"Música",s3:"Almacenamiento en la nube",s4:"App de idiomas",rent:"Alquiler",ins:"Seguro del coche",tax:"IBI",loan:"Préstamo del coche",card:"Tarjeta revolving"};
+  return {v:3,lang,currency,demo:true,lastRecon:t,weeklyRecon:false,reconPrompt:null,reconSnooze:"",theme:S?S.theme:"auto",lastSeen:t,away:null,
+    accounts:[{id:uid(),name:N.main,balance:1240,spend:true},{id:uid(),name:N.sav,balance:3200,spend:false},{id:uid(),name:N.kids,balance:450,spend:false}],
+    cushion:100,aside:0,nudge:null,debtExtra:50,
+    incomes:[{id:uid(),name:N.pay,amount:1450,freq:"monthly",next:addDays(t,12),isPay:true},{id:uid(),name:N.side,amount:60,freq:"monthly",next:addDays(t,4)},{id:uid(),name:N.extra,amount:1450,freq:"once",next:addDays(t,80)}],
+    bills:[{id:uid(),name:N.elec,amount:65,freq:1,next:addDays(t,5),prorate:false},
+      {id:uid(),name:N.net,amount:35,freq:1,next:addDays(t,8),prorate:false},
+      {id:uid(),name:N.rent,amount:550,freq:1,next:addDays(t,14),prorate:false},
+      {id:uid(),name:N.ins,amount:372,freq:6,next:addDays(t,120),prorate:true},
+      {id:uid(),name:N.tax,amount:280,freq:12,next:addDays(t,210),prorate:true},
+      {id:uid(),kind:"sub",name:N.s1,amount:12.99,freq:1,next:addDays(t,9),prorate:false},
+      {id:uid(),kind:"sub",name:N.s2,amount:10.99,freq:1,next:addDays(t,17),prorate:false},
+      {id:uid(),kind:"sub",name:N.s3,amount:29.99,freq:12,next:addDays(t,150),prorate:true},
+      {id:uid(),kind:"sub",name:N.s4,amount:9.99,freq:1,next:addDays(t,2),prorate:false,trialEnd:addDays(t,2)}],
+    debts:[{id:uid(),name:N.loan,balance:4200,rate:6.9,min:120,next:addDays(t,3)},
+      {id:uid(),name:N.card,balance:1100,rate:21.8,min:45,next:addDays(t,10)}],
+    spends:[],tx:[],limits:{}};
+}
+function normalize(x){
+  if(x.variant){ x.lang=x.lang||"es"; x.currency=x.currency||(x.variant==="es-US"?"USD":"EUR"); delete x.variant; }
+  x.v=3; x.lang=LANGS[x.lang]?x.lang:"es"; x.currency=CURRENCIES[x.currency]?x.currency:"EUR";
+  x.incomes=x.incomes||[]; x.bills=x.bills||[]; x.spends=x.spends||[]; x.debts=x.debts||[]; x.debtExtra=x.debtExtra||0;
+  if(!Array.isArray(x.accounts)||!x.accounts.length) x.accounts=[{id:uid(),name:x.lang==="en"?"Main account":"Cuenta principal",balance:typeof x.balance==="number"?x.balance:0,spend:true}];
+  delete x.balance; x.tx=x.tx||[]; x.limits=x.limits||{};
+  // categorías: de nombre a clave interna (para que se traduzcan)
+  x.spends.forEach(sp=>{ if(CAT_LEGACY[sp.cat]) sp.cat=CAT_LEGACY[sp.cat]; else if(!CAT_KEYS.includes(sp.cat)&&sp.cat!=="unlogged") sp.cat="other"; });
+  const lim={}; Object.entries(x.limits).forEach(([k,v])=>{ lim[CAT_LEGACY[k]||k]=v; }); x.limits=lim;
+  if(!x.incomes.some(i=>i.isPay)){ const reg=x.incomes.filter(i=>i.freq!=="once");
+    const pick=reg.find(i=>/n[oó]mina|pago|salario|sueldo|paycheck|salary/i.test(i.name))||reg.sort((a,b)=>b.amount-a.amount)[0]; if(pick) pick.isPay=true; }
+  x.lastRecon=x.lastRecon||todayStr(); x.weeklyRecon=!!x.weeklyRecon; x.reconPrompt=x.reconPrompt||null; x.reconSnooze=x.reconSnooze||""; x.lastSeen=x.lastSeen||todayStr(); x.away=x.away||null; x.aside=x.aside||0; x.cushion=x.cushion||0; return x;
+}
+let S=null;
+try{const raw=localStorage.getItem(KEY); if(raw) S=normalize(JSON.parse(raw));}catch(e){S=null;}
+if(!S) S=exampleState("es","EUR");
+function seedHistory(x){
+  let r=7; const rnd=()=>{r=(r*9301+49297)%233280;return r/233280;};
+  const t=todayStr(), w=[.42,.16,.12,.18,.05,.07];
+  const inc=x.incomes.find(i=>i.isPay)||x.incomes.find(i=>i.freq!=="once"), payAmt=inc?inc.amount:1400, fixed=x.bills.filter(b=>b.freq===1).reduce((s,b)=>s+b.amount,0)+x.debts.reduce((s,d)=>s+d.min,0);
+  for(let m=5;m>=0;m--){
+    const base=addMonths(t,-m).slice(0,8)+"01"; const dim=new Date(toDate(base).getFullYear(),toDate(base).getMonth()+1,0).getDate();
+    const lastDay=m===0?toDate(t).getDate():dim;
+    x.tx.push({type:"income",amount:payAmt,name:inc?inc.name:"",date:base.slice(0,8)+pad(Math.min(3,lastDay))});
+    x.tx.push({type:"bill",amount:fixed,name:"",date:base.slice(0,8)+pad(Math.min(5,lastDay))});
+    for(let d=1;d<=lastDay;d++){ if(rnd()<.55){ let u=rnd(),c=0,acc=0; for(;c<w.length-1;c++){acc+=w[c]; if(u<acc)break;}
+      x.spends.push({id:uid(),amount:Math.round((4+rnd()*38)*(c===0?1.1:1)*100)/100,cat:CAT_KEYS[c],note:"",date:base.slice(0,8)+pad(d)}); } }
+  }
+  x.spends.sort((a,b)=>b.date.localeCompare(a.date)); x.limits={leisure:120,food:300}; return x;
+}
+if(S.demo&&!S.tx.length) seedHistory(S);
+setLang();
+const mainAcc=()=>S.accounts.find(a=>a.spend)||S.accounts[0];
+const accById=id=>S.accounts.find(a=>a.id===id)||mainAcc();
+const adj=(amount,accId)=>{accById(accId).balance+=amount;};
+const spendable=()=>S.accounts.filter(a=>a.spend).reduce((s,a)=>s+a.balance,0);
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+/* "Mientras estabas fuera" al abrir */
+(function checkAway(){
+  const t=todayStr(), gap=daysBetween(S.lastSeen,t);
+  if(gap>=AWAY_DAYS && !S.demo){
+    const bills=S.bills.filter(b=>b.next<=t).map(b=>b.id), debts=S.debts.filter(d=>d.next<=t).map(d=>d.id), inc=S.incomes.filter(i=>i.next<=t).map(i=>i.id);
+    S.away={days:gap,bills,debts,inc};
+  }
+  S.lastSeen=t; save();
+})();
+
+/* ======================= MOTOR ======================= */
+function payIncome(){return S.incomes.find(i=>i.isPay&&i.freq!=="once");}
+function nextPayday(){const p=payIncome(); return p?p.next:addDays(todayStr(),30);}
+function reserveAt(b,date){const mu=daysBetween(date,b.next)/30.44;return b.amount*Math.min(1,Math.max(0,1-mu/b.freq));}
+const isProrated=b=>b.prorate&&b.freq>=2;
+const resAcc=b=>{ if(!isProrated(b)||!b.reserveAcc) return null; const a=S.accounts.find(x=>x.id===b.reserveAcc); return a&&!a.spend?a:null; };
+const isVirtual=b=>isProrated(b)&&!resAcc(b);
+const heldIn=(accId,date)=>S.bills.filter(b=>resAcc(b)&&resAcc(b).id===accId).reduce((s,b)=>s+reserveAt(b,date),0);
+const virtualReserve=date=>S.bills.filter(isVirtual).reduce((s,b)=>s+reserveAt(b,date),0);
+function calc(){
+  const today=todayStr(), pay=nextPayday(), raw=daysBetween(today,pay), days=Math.max(1,raw);
+  const pb=S.bills.filter(b=>!isProrated(b)&&b.next<=pay), pd=S.debts.filter(d=>d.balance>0&&d.next<=pay);
+  const pending=pb.reduce((s,b)=>s+b.amount,0)+pd.reduce((s,d)=>s+Math.min(d.min,d.balance),0);
+  const reserve=virtualReserve(pay);
+  const available=spendable()-pending-reserve-S.cushion-S.aside;
+  return {pay,days,overdue:raw<0,pending,pendingCount:pb.length+pd.length,reserve,available,perDay:available/days};
+}
+function simulate(strategy){
+  let ds=S.debts.filter(d=>d.balance>0).map(d=>({...d}));
+  if(!ds.length) return null;
+  const budget=ds.reduce((s,d)=>s+d.min,0)+(S.debtExtra||0);
+  let months=0, interest=0;
+  while(ds.some(d=>d.balance>0.005)){
+    months++; if(months>600) return {never:true};
+    ds.forEach(d=>{ if(d.balance>0){const i=d.balance*d.rate/1200; d.balance+=i; interest+=i;} });
+    let left=budget;
+    ds.forEach(d=>{ if(d.balance>0){const p=Math.min(d.min,d.balance); d.balance-=p; left-=p;} });
+    const order=ds.filter(d=>d.balance>0).sort(strategy==="snowball"?(a,b)=>a.balance-b.balance:(a,b)=>b.rate-a.rate);
+    for(const d of order){ if(left<=0) break; const p=Math.min(left,d.balance); d.balance-=p; left-=p; }
+  }
+  return {months,interest};
+}
+
+/* ======================= ACCIONES ======================= */
+function logSpend(a,cat,note,acc){
+  if(DEMO&&S.spends.length>=DEMO_LIMIT){flash=T.demoLimit;return render();}
+  const ac=accById(acc); ac.balance-=a; S.spends.unshift({id:uid(),amount:a,cat,note,acc:ac.id,date:todayStr()}); S.spends=S.spends.slice(0,3000); S.tx=S.tx.slice(-1500); save(); render();
+}
+function removeSpend(id){const s=S.spends.find(x=>x.id===id); if(!s)return; adj(s.amount,s.acc); S.spends=S.spends.filter(x=>x.id!==id); save(); render();}
+function payBill(id,silent){const b=S.bills.find(x=>x.id===id); if(!b)return; const ra=resAcc(b); if(ra){ const fromRes=Math.min(b.amount,Math.max(0,ra.balance)); adj(-fromRes,ra.id); if(b.amount-fromRes>0.005) adj(-(b.amount-fromRes)); } else adj(-b.amount); S.tx.push({type:"bill",amount:b.amount,name:b.name,sub:b.kind==="sub",date:todayStr()}); if(b.freq===0) S.bills=S.bills.filter(x=>x.id!==id); else b.next=addMonths(b.next,b.freq); save(); if(!silent) render();}
+function skipBill(id){const b=S.bills.find(x=>x.id===id); if(!b)return; if(b.freq===0) S.bills=S.bills.filter(x=>x.id!==id); else b.next=addMonths(b.next,b.freq);}
+function payDebtMin(id,silent){const d=S.debts.find(x=>x.id===id); if(!d)return; const p=Math.min(d.min,d.balance+d.balance*d.rate/1200);
+  adj(-p); S.tx.push({type:"debt",amount:p,name:d.name,date:todayStr()}); d.balance=Math.max(0,d.balance+d.balance*d.rate/1200-p); d.next=addMonths(d.next,1); save(); if(!silent) render();}
+function receiveIncome(id,silent){const i=S.incomes.find(x=>x.id===id); if(!i)return; adj(i.amount); S.tx.push({type:"income",amount:i.amount,name:i.name,date:todayStr()});
+  if(i.freq==="once"){S.incomes=S.incomes.filter(x=>x.id!==id); S.nudge={amount:i.amount,name:i.name};} else i.next=nextIncomeDate(i);
+  if(i.isPay) S.reconPrompt="pay";
+  save(); if(!silent) render();}
+function skipIncome(id){const i=S.incomes.find(x=>x.id===id); if(!i)return; if(i.freq==="once") S.incomes=S.incomes.filter(x=>x.id!==id); else i.next=nextIncomeDate(i);}
+function doReconcile(prefix,register){
+  let neg=0,pos=0,changed=false; const t=todayStr();
+  S.accounts.forEach(ac=>{
+    const el=document.getElementById(prefix+ac.id); if(!el||String(el.value).trim()==="") return;
+    const real=parseFloat(String(el.value).replace(",",".")); if(isNaN(real)) return;
+    const diff=Math.round((real-ac.balance)*100)/100; if(Math.abs(diff)<0.01) return;
+    if(ac.spend&&register){
+      if(diff<0) S.spends.unshift({id:uid(),amount:-diff,cat:"unlogged",note:"",acc:ac.id,date:t});
+      else S.tx.push({type:"income",amount:diff,name:T.adjustIn,date:t});
+    }
+    if(ac.spend){ if(diff<0) neg+=-diff; else pos+=diff; }
+    ac.balance=real; changed=true;
+  });
+  S.lastRecon=t; S.reconPrompt=null; S.reconSnooze="";
+  const short=S.accounts.filter(a=>!a.spend).map(a=>({a,need:heldIn(a.id,t)-a.balance})).filter(x=>x.need>0.01).map(x=>T.reserveShort(x.a.name,money(x.need)));
+  return {neg,pos,short,changed};
+}
+function reconMsg(r){ const base=(r.neg||r.pos)?T.reconResult(r.neg?money(r.neg):"",r.pos?money(r.pos):""):(r.changed?T.reconResult("",""):T.reconOk); return base+((r.short&&r.short.length)?" "+r.short.join(" "):""); }
+function resolveNudge(share){if(S.nudge){S.aside+=S.nudge.amount*share; S.nudge=null; save(); render();}}
+
+/* ======================= VISTAS ======================= */
+let gsub="dia", showRecon=false, showHelp=false; let tab="hoy", showHow=false, flash="", editing=null, confirmDel=null, awayChoice={};
+const greet=()=>{const h=new Date().getHours();return T.greet[h<14?0:h<21?1:2];};
+const input=(id,label,type,value,extra="")=>`<div class="field"><label for="${id}">${label}</label><input id="${id}" type="${type}" ${type==="number"?'inputmode="decimal" step="0.01"':""} value="${esc(value??"")}" ${extra}></div>`;
+const delBtn=(kind,id)=>confirmDel===kind+id?`<button class="btn small" data-del="${kind}:${id}">${T.sure}</button> <button class="linkbtn" data-act="cancel-del">${T.cancel}</button>`
+  :`<button class="linkbtn" data-ask-del="${kind}:${id}">${T.del}</button>`;
+
+function viewAway(){
+  const a=S.away; const t=todayStr();
+  const bills=S.bills.filter(b=>a.bills.includes(b.id)), debts=S.debts.filter(d=>a.debts.includes(d.id)), inc=S.incomes.filter(i=>a.inc.includes(i.id));
+  const yn=(key)=>{const v=awayChoice[key]??"yes";return `<select class="inline" data-away="${key}"><option value="yes" ${v==="yes"?"selected":""}>${T.yes}</option><option value="no" ${v==="no"?"selected":""}>${T.awaySkip}</option></select>`;};
+  return `<section class="nudge away" aria-labelledby="awt"><h2 id="awt" style="margin-top:0">${T.awayTitle(a.days)}</h2>
+  ${bills.length||debts.length?`<p class="muted" style="margin:8px 0 0">${T.awayBills}: ${T.paidQ}</p><ul class="list">${bills.map(b=>`<li><span>${esc(b.name)} · ${money(b.amount)}</span>${yn("b:"+b.id)}</li>`).join("")}${debts.map(d=>`<li><span>${esc(d.name)} · ${money(d.min)}</span>${yn("d:"+d.id)}</li>`).join("")}</ul>`:""}
+  ${inc.length?`<p class="muted" style="margin:12px 0 0">${T.awayInc}: ${T.arrivedQ}</p><ul class="list">${inc.map(i=>`<li><span>${esc(i.name)} · ${money(i.amount)}</span>${yn("i:"+i.id)}</li>`).join("")}</ul>`:""}
+  <div style="margin-top:12px">${S.accounts.map(ac=>input("awBal-"+ac.id,T.awayAcc(esc(ac.name)),"number","",`placeholder="${ac.balance.toFixed(2)}"`)).join("")}</div>
+  <div class="row"><button class="btn" data-act="away-done">${T.awayDone}</button><button class="btn ghost small" data-act="away-dismiss">${T.dismiss}</button></div>
+  <button class="howbtn" data-act="away-fresh">${T.awayFresh}</button></section>`;
+}
+
+function logForm(){ return `<section class="log" aria-labelledby="logt"><h2 id="logt" style="margin-top:0">${T.logTitle}</h2>
+    <div class="quick">${V.quick.map(n=>`<button data-quick="${n}">${n} ${V.sym}</button>`).join("")}</div>
+    <div class="row">${input("sAmt",T.amount,"number","",'min="0"')}
+      <div class="field"><label for="sCat">${T.category}</label><select id="sCat">${CAT_KEYS.map(k=>`<option value="${k}">${T.cats[k]}</option>`).join("")}</select></div></div>
+    ${input("sNote",T.note,"text","",'maxlength="60"')}
+    ${S.accounts.length>1?`<div class="field"><label for="sAcc">${T.account}</label><select id="sAcc">${S.accounts.map(a=>`<option value="${a.id}" ${a.id===mainAcc().id?"selected":""}>${esc(a.name)}</option>`).join("")}</select></div>`:""}
+    <button class="btn" data-act="log">${T.save}</button></section>`; }
+function viewRecon(){
+  return `<section class="nudge away" aria-labelledby="rct"><h2 id="rct" style="margin-top:0">${T.reconTitle}</h2>
+  <p class="muted" style="margin:6px 0 10px;font-weight:400">${T.reconHint}</p>
+  ${S.accounts.map(ac=>{ const t=todayStr(), vr=ac.spend&&ac.id===mainAcc().id?virtualReserve(t):0, hd=!ac.spend?heldIn(ac.id,t):0;
+    return `<div class="field"><label for="rec-${ac.id}">${esc(ac.name)} · <span class="muted">${T.reconExpect(money(ac.balance))}</span>
+    ${vr>0.01?`<br><span class="muted" style="font-size:.85rem">${T.reconReserved(money(vr))}</span>`:""}${hd>0.01?`<br><span class="muted" style="font-size:.85rem">${T.reconShould(money(hd))}</span>`:""}</label>
+    <input id="rec-${ac.id}" type="number" inputmode="decimal" step="0.01" placeholder="${ac.balance.toFixed(2)}"></div>`;}).join("")}
+  <label class="check"><input id="recU" type="checkbox" checked><span style="font-weight:400">${T.reconUnlogged}</span></label>
+  <div class="row"><button class="btn" data-act="recon-do">${T.reconDo}</button><button class="btn ghost small" data-act="recon-cancel">${T.cancel}</button></div></section>`;
+}
+function reconPromptText(){
+  if(S.demo||showRecon||S.away) return "";
+  const t=todayStr(); if(S.reconSnooze===t) return "";
+  if(S.reconPrompt==="pay") return T.reconPay;
+  const d=daysBetween(S.lastRecon,t);
+  if(d>30) return T.reconOld(d);
+  if(S.weeklyRecon&&d>=7) return T.reconWeek;
+  return "";
+}
+function trialNudges(){
+  const t=todayStr();
+  return S.bills.filter(b=>b.kind==="sub"&&b.trialEnd&&b.trialEnd>=t&&daysBetween(t,b.trialEnd)<=3).map(b=>`<div class="nudge warn"><p>${T.trialNudge(esc(b.name),niceDate(b.trialEnd),money(b.amount))}</p>
+    <div class="row"><button class="btn small" data-trialkeep="${b.id}">${T.keepSub}</button><button class="btn small ghost" data-trialcancel="${b.id}">${T.cancelSub}</button></div></div>`).join("");
+}
+function viewHoy(){
+  const c=calc(), below=c.available<0;
+  const ticks=Array.from({length:Math.min(c.days,45)},(_,i)=>`<span class="${i===0?"now":""}"></span>`).join("");
+  const rp=reconPromptText();
+  return `<div class="wordmark" aria-label="NeoBalance">Neo<span>Balance</span></div>${S.away?viewAway():""}${showRecon?viewRecon():""}
+  ${rp?`<div class="nudge warn"><p>${rp}</p><div class="row"><button class="btn small" data-act="recon-open">${T.reconNow}</button><button class="btn small ghost" data-act="recon-later">${T.reconLater}</button></div></div>`:""}
+  ${trialNudges()}
+  ${S.demo?`<div class="nudge" style="margin-bottom:20px"><p>${T.demoBanner}</p></div>`:""}
+  <p class="greet">${greet()}. ${T.todayLabel}:</p>
+  <h1 class="today-num" aria-live="polite">${money(below?0:c.perDay)}</h1>
+  <p class="period" style="${below?"border:3px solid var(--accent);border-radius:12px;padding:10px 12px;font-weight:700":""}">${below?T.belowPay(money(-c.available),niceDate(c.pay)):T.untilPay(money(c.available),niceDate(c.pay),c.days)}</p>
+  <div class="runway" aria-hidden="true">${ticks}</div><p class="runway-label">${T.runway(niceDate(c.pay))}</p>
+  ${c.overdue?`<div class="nudge warn"><p>${T.overdue}</p></div>`:""}
+  <div class="row" style="gap:18px"><button class="howbtn" data-act="how" aria-expanded="${showHow}">${showHow?T.hide:T.how}</button><button class="howbtn" data-act="recon-open">${T.recon}</button></div>
+  ${showHow?`<div class="breakdown">
+    <div><span>${T.bd.balance}</span><span>${money(spendable())}</span></div>
+    <div><span>− ${T.bd.pending} (${c.pendingCount})</span><span>${money(c.pending)}</span></div>
+    <div><span>− ${T.bd.reserve}</span><span>${money(c.reserve)}</span></div>
+    <div><span>− ${T.bd.cushion}</span><span>${money(S.cushion)}</span></div>
+    ${S.aside?`<div><span>− ${T.bd.aside}</span><span>${money(S.aside)}</span></div>`:""}
+    <div class="total"><span>${T.bd.total}</span><span>${money(c.available)}</span></div>
+    <div class="muted"><span>÷ ${c.days} ${T.daysWord(c.days)}</span><span>${money(c.perDay)}</span></div>
+    ${S.accounts.filter(a=>!a.spend).map(a=>{const h=heldIn(a.id,todayStr()); return `<div class="muted"><span>${esc(a.name)} (${T.notCounted}${h>0.01?" · "+T.resIncl(money(h)):""})</span><span>${money(a.balance)}</span></div>`;}).join("")}</div>`:""}
+  ${S.nudge?`<div class="nudge extra"><p>${T.extraNudge(money(S.nudge.amount),esc(S.nudge.name))}</p><div class="row">
+    <button class="btn small" data-act="n-half">${T.asideHalf}</button><button class="btn small" data-act="n-all">${T.asideAll}</button>
+    <button class="btn small ghost" data-act="n-keep">${T.keep}</button></div></div>`:""}
+  ${logForm()}
+  <h2>${T.recent}</h2>
+  ${S.spends.length?`<ul class="list">${S.spends.slice(0,5).map(s=>`<li><div><div>${esc(catName(s.cat))}${s.note?` · ${esc(s.note)}`:""}</div><div class="meta">${niceDate(s.date)}${S.accounts.length>1?" · "+esc(accById(s.acc).name):""}</div></div>
+    <div class="row" style="align-items:center"><span class="amt">${money(s.amount)}</span><button class="linkbtn" data-del-spend="${s.id}">${T.undo}</button></div></li>`).join("")}</ul>
+    <button class="btn ghost" style="margin-top:14px" data-act="hist">${T.histBtn(S.spends.length)}</button>`:`<p class="empty">${T.noSpends}</p>`}
+  <p style="margin-top:22px"><button class="linkbtn" data-act="help">${T.help.link}</button></p>`;
+}
+
+function viewRecibos(){
+  const e=editing&&editing.kind==="b"?S.bills.find(b=>b.id===editing.id):null;
+  const bills=S.bills.filter(b=>b.kind!=="sub").sort((a,b)=>a.next.localeCompare(b.next)), t=todayStr();
+  const freqOpts=[1,2,3,6,12,0].map(k=>`<option value="${k}" ${e&&e.freq===k?"selected":""}>${T.freqBill[k]}</option>`).join("");
+  return `<p class="muted" style="margin-top:6px">${T.billsHint}</p>
+  <h2>${e?T.edit+": "+esc(e.name):T.addBill}</h2>
+  ${input("bName",T.name,"text",e?.name,'maxlength="40"')}
+  <div class="row">${input("bAmt",T.amount,"number",e?.amount,'min="0"')}
+    <div class="field"><label for="bFreq">${T.every}</label><select id="bFreq">${freqOpts}</select></div></div>
+  ${input("bNext",T.nextDate,"date",e?.next||t)}
+  <label class="check"><input id="bPro" type="checkbox" ${e?.prorate?"checked":""}><span>${T.prorate}</span></label>
+  ${S.accounts.some(a=>!a.spend)?`<div class="field"><label for="bRes">${T.whereRes}</label><select id="bRes"><option value="">${T.whereVirtual}</option>${S.accounts.filter(a=>!a.spend).map(a=>`<option value="${a.id}" ${e?.reserveAcc===a.id?"selected":""}>${esc(a.name)}</option>`).join("")}</select><span class="muted" style="font-size:.85rem">${T.whereHint}</span></div>`:""}
+  <div class="row"><button class="btn" data-act="save-bill">${e?T.editBill:T.addBill}</button>${e?`<button class="btn ghost" data-act="cancel-edit">${T.cancel}</button>`:""}</div>
+  <h2>${T.upcoming}</h2>
+  ${bills.length?`<ul class="list">${bills.map(b=>`<li><div><div>${esc(b.name)}${b.next<t?`<span class="tag">${T.late}</span>`:""}</div>
+    <div class="meta">${niceDate(b.next)} · ${T.freqBill[b.freq]}${isProrated(b)?` · ${T.prorating(money(b.amount/b.freq))}${resAcc(b)?` · ${T.resIn(esc(resAcc(b).name))}`:""}`:""}</div></div>
+    <div style="text-align:right"><div class="amt">${money(b.amount)}</div><button class="btn small" data-pay="${b.id}">${T.paid}</button>
+    <button class="linkbtn" data-edit="b:${b.id}">${T.edit}</button> ${delBtn("b",b.id)}</div></li>`).join("")}</ul>`:`<p class="empty">${T.noBills}</p>`}`;
+}
+
+function viewDeudas(){
+  const e=editing&&editing.kind==="d"?S.debts.find(d=>d.id===editing.id):null, t=todayStr();
+  const sn=simulate("snowball"), av=simulate("avalanche");
+  let compare="";
+  if(sn&&av){
+    if(sn.never||av.never) compare=`<div class="nudge warn"><p>${T.never}</p></div>`;
+    else{
+      const best=av.interest<=sn.interest?"av":"sn";
+      const box=(k,title,sub,r)=>`<div class="${best===k?"best":""}"><strong>${title}</strong><span class="muted">${sub}</span>
+        <p style="margin-top:8px">${T.freeOn(monthYear(addMonths(t,r.months)))}</p><p class="muted">${T.interest(money(r.interest))}</p>${best===k?`<span class="tag" style="margin:6px 0 0">${T.cheaper}</span>`:""}</div>`;
+      compare=`<div class="compare">${box("sn",T.snowball,T.snowballSub,sn)}${box("av",T.avalanche,T.avalancheSub,av)}</div><p class="muted" style="font-size:.88rem;margin-top:8px">${T.estimate}</p>`;
+    }
+  }
+  const debts=S.debts.filter(d=>d.balance>0);
+  return `<p class="muted" style="margin-top:6px">${T.debtHint}</p>
+  ${debts.length?`<div class="row" style="align-items:flex-end;margin-top:18px">${input("dExtra",T.extraMonth,"number",S.debtExtra,'min="0"')}<button class="btn small" style="margin-bottom:10px" data-act="save-extra">${T.update}</button></div>${compare}`:""}
+  <h2>${e?T.edit+": "+esc(e.name):T.addDebt}</h2>
+  ${input("dName",T.name,"text",e?.name,'maxlength="40"')}
+  <div class="row">${input("dBal",T.debtBal,"number",e?.balance,'min="0"')}${input("dRate",T.debtRate,"number",e?.rate,'min="0"')}</div>
+  <div class="row">${input("dMin",T.debtMin,"number",e?.min,'min="0"')}${input("dNext",T.nextDate,"date",e?.next||t)}</div>
+  <div class="row"><button class="btn" data-act="save-debt">${e?T.editBill:T.addDebt}</button>${e?`<button class="btn ghost" data-act="cancel-edit">${T.cancel}</button>`:""}</div>
+  ${debts.length?`<h2>${T.extraPay}</h2><div class="row"><div class="field"><label for="xDebt">${T.which}</label><select id="xDebt">${debts.map(d=>`<option value="${d.id}">${esc(d.name)}</option>`).join("")}</select></div>
+    ${input("xAmt",T.amount,"number","",'min="0"')}</div><button class="btn small" data-act="extra-pay">${T.register}</button>`:""}
+  <h2>${T.upcoming}</h2>
+  ${S.debts.length?`<ul class="list">${[...S.debts].sort((a,b)=>a.next.localeCompare(b.next)).map(d=>`<li><div><div>${esc(d.name)}${d.balance>0&&d.next<t?`<span class="tag">${T.late}</span>`:""}</div>
+    <div class="meta">${money(d.balance)} · ${d.rate}% · ${T.minLbl} ${money(d.min)} · ${niceDate(d.next)}</div></div>
+    <div style="text-align:right">${d.balance>0?`<button class="btn small" data-paydebt="${d.id}">${T.minPaid}</button>`:"✓"}
+    <button class="linkbtn" data-edit="d:${d.id}">${T.edit}</button> ${delBtn("d",d.id)}</div></li>`).join("")}</ul>`:`<p class="empty">${T.noDebts}</p>`}`;
+}
+
+function viewIngresos(){
+  const e=editing&&editing.kind==="i"?S.incomes.find(i=>i.id===editing.id):null;
+  const inc=[...S.incomes].sort((a,b)=>a.next.localeCompare(b.next)), t=todayStr();
+  return `<h1 style="font-size:1.9rem">${T.incomeTitle}</h1><p class="muted" style="margin-top:6px">${T.incomeHint}</p>
+  <h2>${e?T.edit+": "+esc(e.name):T.addIncome}</h2>
+  ${input("iName",T.name,"text",e?.name,'maxlength="40"')}
+  <div class="row">${input("iAmt",T.amount,"number",e?.amount,'min="0"')}
+    <div class="field"><label for="iFreq">${T.every}</label><select id="iFreq">${Object.entries(T.freqInc).map(([k,v])=>`<option value="${k}" ${e&&e.freq===k?"selected":""}>${v}</option>`).join("")}</select></div></div>
+  ${input("iNext",T.nextDate,"date",e?.next||t)}
+  <label class="check"><input id="iPay" type="checkbox" ${e?(e.isPay?"checked":""):(payIncome()?"":"checked")}><span>${T.isPay}</span></label>
+  <div class="row"><button class="btn" data-act="save-inc">${e?T.editBill:T.addIncome}</button>${e?`<button class="btn ghost" data-act="cancel-edit">${T.cancel}</button>`:""}</div>
+  ${inc.length&&!payIncome()?`<div class="nudge warn"><p>${T.noPay}</p></div>`:""}
+  <h2>${T.upcoming}</h2>
+  ${inc.length?`<ul class="list">${inc.map(i=>`<li><div><div>${esc(i.name)}${i.isPay?`<span class="tag" style="border-color:var(--line)">${T.payTag}</span>`:""}${i.next<t?`<span class="tag">${T.late}</span>`:""}</div><div class="meta">${niceDate(i.next)} · ${T.freqInc[i.freq]}</div></div>
+    <div style="text-align:right"><div class="amt">${money(i.amount)}</div><button class="btn small" data-recv="${i.id}">${T.received}</button>
+    <button class="linkbtn" data-edit="i:${i.id}">${T.edit}</button> ${delBtn("i",i.id)}</div></li>`).join("")}</ul>`:`<p class="empty">${T.noIncome}</p>`}`;
+}
+
+
+/* ---------- Mes ---------- */
+const ym=s=>s.slice(0,7);
+function periodStats(pred){
+  const sp=S.spends.filter(x=>pred(x.date)), tx=S.tx.filter(x=>pred(x.date));
+  const income=tx.filter(t=>t.type==="income").reduce((a,t)=>a+t.amount,0);
+  const subs=tx.filter(t=>t.type==="bill"&&t.sub).reduce((a,t)=>a+t.amount,0);
+  const fixed=tx.filter(t=>t.type!=="income").reduce((a,t)=>a+t.amount,0);
+  const variable=sp.reduce((a,x)=>a+x.amount,0);
+  const byCat={}; sp.forEach(x=>byCat[x.cat]=(byCat[x.cat]||0)+x.amount);
+  return {income,subs,fixed,fixedNoSub:fixed-subs,variable,out:fixed+variable,saved:income-fixed-variable,byCat,n:sp.length+tx.length};
+}
+function monthStats(key){ return periodStats(d=>d.slice(0,7)===key); }
+function firstDataDate(){ const all=[...S.spends.map(x=>x.date),...S.tx.map(x=>x.date)].sort(); return all[0]||todayStr(); }
+function monthForecast(){
+  const t=todayStr(), d=toDate(t), dim=new Date(d.getFullYear(),d.getMonth()+1,0).getDate(), day=d.getDate();
+  const eom=toStr(new Date(d.getFullYear(),d.getMonth(),dim,12)), left=dim-day;
+  const cur=monthStats(ym(t));
+  let pace=cur.variable/Math.max(1,day);
+  if(day<5){ const prev=monthStats(ym(addMonths(t,-1))); if(prev.variable>0) pace=prev.variable/30.44; }
+  const bills=S.bills.filter(b=>!isProrated(b)&&b.next<=eom).reduce((s,b)=>s+b.amount,0);
+  const debts=S.debts.filter(x=>x.balance>0&&x.next<=eom).reduce((s,x)=>s+Math.min(x.min,x.balance),0);
+  let inc=0; S.incomes.forEach(i=>{ let n=i.next; let g=0; while(n&&n<=eom&&g<10){ inc+=i.amount; if(i.freq==="once")break; n=nextIncomeDate({...i,next:n}); g++; } });
+  return spendable()-bills-debts+inc-pace*left;
+}
+function insights(key){
+  const out=[], cur=monthStats(key), t=toDate(todayStr());
+  const dim=new Date(t.getFullYear(),t.getMonth()+1,0).getDate(), frac=Math.max(t.getDate(),1)/dim;
+  const prevKeys=[1,2,3].map(n=>ym(addMonths(todayStr(),-n))), prev=prevKeys.map(monthStats).filter(m=>m.variable>0);
+  if(prev.length>=2 && t.getDate()>=7){
+    Object.keys(cur.byCat).filter(c=>c!=="unlogged").forEach(c=>{
+      const avg=prev.reduce((s,m)=>s+(m.byCat[c]||0),0)/prev.length; if(avg<15) return;
+      const proj=cur.byCat[c]/frac, p=Math.round((proj/avg-1)*100);
+      if(p>=30&&proj-avg>20) out.push(T.insMore(catName(c),p)); else if(p<=-30) out.push(T.insLess(catName(c),-p));
+    });
+  }
+  Object.entries(S.limits).forEach(([c,l])=>{ const s=cur.byCat[c]||0; if(l>0&&s>l) out.unshift(T.insOver(catName(c),money(s-l))); });
+  const pm=monthStats(ym(addMonths(todayStr(),-1)));
+  if(cur.income>0&&pm.income>0) out.push(T.insRate(Math.round(cur.saved/cur.income*100),Math.round(pm.saved/pm.income*100)));
+  if(cur.byCat.unlogged>0) out.push(T.insUnlogged(money(cur.byCat.unlogged)));
+  if(monthForecast()<0) out.unshift(T.insNeg);
+  return out.slice(0,3);
+}
+let mview="mes", moff=0, yoff=0;
+const pct=(a,b)=>b>0?Math.round(a/b*100):0;
+function donutSVG(items,total,center,sub){
+  const r=42, C=2*Math.PI*r, gap=items.length>1?1.2:0; let acc=0;
+  const segs=items.map(it=>{const f=it.value/total, len=Math.max(0,f*C-gap);
+    const el=`<circle class="seg2" cx="60" cy="60" r="${r}" fill="none" stroke="${it.color}" stroke-width="18" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-acc}" transform="rotate(-90 60 60)"><title>${esc(it.label)}: ${money(it.value)} (${pct(it.value,total)} %)</title></circle>`;
+    acc+=f*C; return el;}).join("");
+  return `<svg viewBox="0 0 120 120" role="img" aria-label="${esc(sub)}: ${money(total)}">
+    <circle cx="60" cy="60" r="${r}" fill="none" stroke="var(--line)" stroke-width="18" opacity=".35"/>${segs}
+    <text x="60" y="58" text-anchor="middle" style="font:700 13px var(--display);fill:var(--ink)">${center}</text>
+    <text x="60" y="74" text-anchor="middle" style="font:400 9.5px var(--body);fill:var(--muted)">${esc(sub)}</text></svg>`;
+}
+function donut(items,total,sub,base){   // base = total contra el que se calculan los %
+  items=items.filter(i=>i.value>0.005).sort((a,b)=>b.value-a.value);
+  if(!items.length) return "";
+  const b=base||total;
+  return `<div class="donut">${donutSVG(items,total,money(Math.round(b)).replace(/[.,]00(?=\D*$)/,""),sub)}
+  <ul class="legend">${items.map(i=>`<li><span class="sw" style="background:${i.color}"></span><span>${esc(i.label)}</span><span class="pc">${pct(i.value,b)} %</span><span class="am">${money(i.value)}</span></li>`).join("")}</ul></div>`;
+}
+function destDonut(st){
+  if(st.income<=0) return `<p class="empty">${T.destNone}</p>`;
+  const items=[{label:T.destBills,value:st.fixedNoSub,color:"var(--c2)"},{label:T.destSubs,value:st.subs,color:"var(--c4)"},
+    {label:T.destVar,value:st.variable,color:"var(--c3)"},{label:T.destSaved,value:Math.max(0,st.saved),color:"var(--c1)"}];
+  const deficit=st.saved<0;
+  return donut(items,deficit?st.out:st.income,deficit?T.destOut:T.destIn,deficit?st.out:st.income)+(st.saved<0?`<p class="meta" style="margin-top:6px;font-weight:700;color:var(--ink)">${T.destOver(money(-st.saved))}</p>`:"");
+}
+const CAT_COLOR={food:"var(--c1)",transport:"var(--c2)",home:"var(--c3)",leisure:"var(--c4)",health:"var(--c5)",other:"var(--c6)",unlogged:"var(--c7)"};
+function catDonut(st){
+  const items=Object.entries(st.byCat).map(([k,v])=>({label:catName(k),value:v,color:CAT_COLOR[k]||"var(--c6)"}));
+  if(!st.variable) return `<p class="empty">${T.catNone}</p>`;
+  return donut(items,st.variable,T.catTotal);
+}
+function barsRows(rows){
+  const max=Math.max(1,...rows.map(x=>Math.max(x.income,x.out)));
+  return `<p class="meta" style="margin-bottom:6px"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--accent)"></span> ${T.evoIn} &nbsp; <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--contrast)"></span> ${T.evoOut}</p>`+
+  rows.map(x=>`<div style="display:grid;grid-template-columns:44px 1fr;gap:8px;align-items:center;margin:6px 0">
+    <span class="meta">${x.label}</span><div><div title="${T.evoIn}: ${money(x.income)}" style="height:9px;border-radius:3px;background:var(--accent);width:${x.income/max*100}%"></div>
+    <div title="${T.evoOut}: ${money(x.out)}" style="height:9px;border-radius:3px;background:var(--contrast);margin-top:3px;width:${x.out/max*100}%"></div></div></div>`).join("");
+}
+function summary(st){
+  const rate=st.income>0?Math.round(st.saved/st.income*100):null;
+  return `<div class="breakdown" style="margin-top:16px">
+    <div><span>${T.inM}</span><span>${money(st.income)}</span></div>
+    <div><span>− ${T.fixedM}</span><span>${money(st.fixed)}</span></div>
+    <div><span>− ${T.varM}</span><span>${money(st.variable)}</span></div>
+    <div class="total"><span>${T.savedM}</span><span>${money(st.saved)}</span></div>
+    ${rate!==null?`<div class="muted"><span>${T.rate}</span><span>${rate} %</span></div>`:""}</div>`;
+}
+function viewMes(){
+  const seg=`<div class="seg" role="group">${Object.entries(T.mview).map(([k,v])=>`<button data-mview="${k}" aria-pressed="${mview===k}">${v}</button>`).join("")}</div>`;
+  return seg+(mview==="ano"?viewAno():viewMonth());
+}
+function viewMonth(){
+  const t=todayStr(), first=firstDataDate(), key=ym(addMonths(t,-moff)), cur=moff===0, m=monthStats(key);
+  const canPrev=key>ym(first);
+  const monthName=toDate(key+"-01").toLocaleDateString(V.locale,{month:"long",year:"numeric"});
+  const cats=CAT_KEYS.map(c=>{const s=m.byCat[c]||0, l=S.limits[c]||0, pc=l>0?Math.min(100,s/l*100):0, over=l>0&&s>l;
+    if(!cur&&!s&&!l) return "";
+    return `<li class="${over?"over":""}" style="display:block"><div style="display:flex;justify-content:space-between;gap:10px"><span>${T.cats[c]}</span><span class="amt">${money(s)}</span></div>
+    ${l>0?`<div class="bar"><i style="width:${pc}%"></i></div>
+    <div class="meta">${over?T.over(money(s-l)):T.left(money(l-s))} · ${T.limit} ${money(l)}</div>`:(cur?`<div class="meta">${T.noLimit}</div>`:"")}
+    ${cur?`<div class="field" style="margin:6px 0 0;max-width:160px"><label for="lim-${c}" class="sr">${T.limit} ${T.cats[c]}</label><input id="lim-${c}" data-limit="${c}" type="number" inputmode="decimal" min="0" step="1" value="${l||""}" placeholder="${T.limit}"></div>`:""}</li>`;}).join("");
+  const rows=[5,4,3,2,1,0].map(n=>{const k=ym(addMonths(key+"-01",-n)); return {label:toDate(k+"-01").toLocaleDateString(V.locale,{month:"short"}),...monthStats(k)};});
+  let head="";
+  if(cur){ const f=monthForecast(); head=`<p class="period" style="margin-top:10px">${f>=0?T.forecast(money(f)):T.forecastNeg(money(-f))}</p><p class="muted" style="font-size:.88rem;margin-top:4px">${T.forecastNote}</p>`; }
+  else head=`<p class="meta" style="margin-top:6px">${T.closed}</p>`;
+  const ins=cur?insights(key):[];
+  return `<div class="mnav"><button data-moff="1" ${canPrev?"":"disabled"} aria-label="${T.prevM}">‹</button>
+    <h1 style="font-size:1.6rem;text-align:center">${T.mesTitle(monthName)}</h1>
+    <button data-moff="-1" ${cur?"disabled":""} aria-label="${T.nextM}">›</button></div>
+  ${head}${summary(m)}
+  <h2>${T.destTitle}</h2>${destDonut(m)}
+  <h2>${T.catTitle}</h2>${catDonut(m)}
+  ${cur?`<h2>${T.insights}</h2>${ins.length?`<ul class="list">${ins.map(i=>`<li>${i}</li>`).join("")}</ul>`:`<p class="empty">${T.noInsights}</p>`}`:""}
+  <h2>${T.byCat}</h2>${cur?`<p class="muted" style="margin-bottom:6px">${T.limitHint}</p>`:""}
+  <ul class="list">${cats}${m.byCat.unlogged?`<li><span>${T.cats.unlogged}</span><span class="amt">${money(m.byCat.unlogged)}</span></li>`:""}</ul>
+  ${cur?`<button class="btn small" style="margin-top:12px" data-act="save-limits">${T.saveLimits}</button>`:""}
+  <h2>${T.evo}</h2>${barsRows(rows)}`;
+}
+function viewAno(){
+  const t=todayStr(), cy=toDate(t).getFullYear(), y=cy-yoff, first=firstDataDate(), fy=toDate(first).getFullYear();
+  const isCur=y===cy, md=t.slice(5);                       // en el año en curso: hasta hoy
+  const inY=(d,yr)=>d.slice(0,4)===String(yr)&&(!isCur||d.slice(5)<=md);
+  const st=periodStats(d=>inY(d,y)), prev=periodStats(d=>inY(d,y-1));
+  const lastM=isCur?toDate(t).getMonth()+1:12, firstM=y===fy?toDate(first).getMonth():0;
+  const rows=[...Array(lastM-firstM)].map((_,j)=>{const i=j+firstM;const k=`${y}-${pad(i+1)}`; return {label:toDate(k+"-01").toLocaleDateString(V.locale,{month:"short"}),...monthStats(k)};});
+  const rateP=prev.income>0?Math.round(prev.saved/prev.income*100)+" %":"—";
+  return `<div class="mnav"><button data-yoff="1" ${y>fy?"":"disabled"} aria-label="${T.prevM}">‹</button>
+    <h1 style="font-size:1.6rem;text-align:center">${isCur?T.ytd(y):T.fullYear(y)}</h1>
+    <button data-yoff="-1" ${isCur?"disabled":""} aria-label="${T.nextM}">›</button></div>
+  ${first.slice(0,4)===String(y)&&first.slice(5)>"01-01"?`<p class="meta" style="margin-top:6px">${T.dataSince(niceDate(first))}</p>`:""}
+  ${summary(st)}
+  ${prev.n?`<p class="meta" style="margin-top:8px">${T.yrComp(y-1,money(prev.income),money(prev.out),rateP)}</p>`:""}
+  <h2>${T.destTitle}</h2>${destDonut(st)}
+  <h2>${T.catTitle}</h2>${catDonut(st)}
+  <h2>${T.yrSubs}</h2><p class="period"><strong>${money(st.subs)}</strong></p><p class="meta">${T.yrSubsHint}</p>
+  <h2>${T.yrMonths}</h2>${barsRows(rows)}`;
+}
+
+
+/* ---------- Historial de gastos ---------- */
+let hf={month:"",cat:"",acc:""}, showCsv=false;
+function histFiltered(){
+  return S.spends.filter(s=>(!hf.month||ym(s.date)===hf.month)&&(!hf.cat||s.cat===hf.cat)&&(!hf.acc||accById(s.acc).id===hf.acc))
+    .sort((a,b)=>b.date.localeCompare(a.date));
+}
+function viewHist(){
+  const e=editing&&editing.kind==="s"?S.spends.find(x=>x.id===editing.id):null;
+  const months=[...new Set(S.spends.map(s=>ym(s.date)))].sort().reverse();
+  const list=histFiltered(), total=list.reduce((s,x)=>s+x.amount,0);
+  const groups={}; list.forEach(s=>{(groups[s.date]=groups[s.date]||[]).push(s);});
+  const sep=T.csvSep; const csv=T.csvHead+"\n"+list.map(s=>[s.date,T.decComma?String(s.amount).replace(".",","):String(s.amount),catName(s.cat),(s.note||"").replace(new RegExp(sep,"g")," "),accById(s.acc).name].join(sep)).join("\n");
+  const opt=(v,l,cur)=>`<option value="${v}" ${cur===v?"selected":""}>${l}</option>`;
+  return `${e?"":logForm()}
+  <h2>${T.histTitle}</h2>
+  ${e?`<section class="log"><h2 style="margin-top:0">${T.editSpend}</h2>
+    <div class="row">${input("eAmt",T.amount,"number",e.amount,'min="0"')}${input("eDate",T.date,"date",e.date)}</div>
+    <div class="row"><div class="field"><label for="eCat">${T.category}</label><select id="eCat">${[...CAT_KEYS,"unlogged"].map(k=>opt(k,T.cats[k],e.cat)).join("")}</select></div>
+    ${S.accounts.length>1?`<div class="field"><label for="eAcc">${T.account}</label><select id="eAcc">${S.accounts.map(a=>opt(a.id,esc(a.name),accById(e.acc).id)).join("")}</select></div>`:""}</div>
+    ${input("eNote",T.note,"text",e.note,'maxlength="60"')}
+    <div class="row"><button class="btn" data-act="save-spend">${T.editBill}</button><button class="btn ghost" data-act="cancel-edit">${T.cancel}</button></div></section>`:""}
+  <div class="row" style="margin-top:16px">
+    <div class="field"><label for="hMonth">${T.monthLbl}</label><select id="hMonth" data-hf="month">${opt("",T.allMonths,hf.month)}${months.map(m=>opt(m,toDate(m+"-01").toLocaleDateString(V.locale,{month:"long",year:"numeric"}),hf.month)).join("")}</select></div>
+    <div class="field"><label for="hCat">${T.category}</label><select id="hCat" data-hf="cat">${opt("",T.allCats,hf.cat)}${[...CAT_KEYS,"unlogged"].map(k=>opt(k,T.cats[k],hf.cat)).join("")}</select></div>
+    ${S.accounts.length>1?`<div class="field"><label for="hAcc">${T.account}</label><select id="hAcc" data-hf="acc">${opt("",T.allAcc,hf.acc)}${S.accounts.map(a=>opt(a.id,esc(a.name),hf.acc)).join("")}</select></div>`:""}
+  </div>
+  <p class="period"><strong>${T.histTotal(list.length,money(total))}</strong></p>
+  ${list.length?Object.entries(groups).map(([d,items])=>`<h2 style="font-size:1rem;margin:18px 0 0">${niceDate(d)} · ${money(items.reduce((s,x)=>s+x.amount,0))}</h2>
+    <ul class="list">${items.map(s=>`<li><div><div>${esc(catName(s.cat))}${s.note?` · ${esc(s.note)}`:""}</div>${S.accounts.length>1?`<div class="meta">${esc(accById(s.acc).name)}</div>`:""}</div>
+    <div style="text-align:right"><div class="amt">${money(s.amount)}</div><button class="linkbtn" data-edit="s:${s.id}">${T.edit}</button> ${delBtn("s",s.id)}</div></li>`).join("")}</ul>`).join("")
+  :`<p class="empty">${T.histEmpty}</p>`}
+  <button class="btn ghost small" style="margin-top:18px" data-act="csv">${T.csv}</button>
+  ${showCsv?`<p class="muted" style="margin:10px 0 6px">${T.csvHint}</p><textarea id="csvTxt">${esc(csv)}</textarea><button class="btn small" style="margin-top:8px" data-act="copy-csv">${T.copy}</button>`:""}
+  <p class="muted" style="margin-top:18px;font-size:.88rem">${T.histWhere}</p>`;
+}
+
+
+/* ---------- Suscripciones ---------- */
+function viewSubs(){
+  const e=editing&&editing.kind==="sub"?S.bills.find(b=>b.id===editing.id):null, t=todayStr();
+  const subs=S.bills.filter(b=>b.kind==="sub"&&b.freq>0).sort((a,b)=>b.amount/b.freq-a.amount/a.freq);
+  const month=subs.reduce((s,b)=>s+b.amount/b.freq,0);
+  return `<p class="muted" style="margin-top:6px">${T.subsHint}</p>
+  ${subs.length?`<div class="compare" style="margin-top:14px"><div><span class="muted">${T.subsMonth}</span><strong>${money(month)}</strong></div>
+    <div class="best"><span class="muted">${T.subsYear}</span><strong>${money(month*12)}</strong></div></div>
+    <p class="meta" style="margin-top:6px">${T.subsCount(subs.length)}</p>`:""}
+  <h2>${e?T.edit+": "+esc(e.name):T.addSub}</h2>
+  ${input("uName",T.name,"text",e?.name,'maxlength="40"')}
+  <div class="row">${input("uAmt",T.amount,"number",e?.amount,'min="0"')}
+    <div class="field"><label for="uFreq">${T.every}</label><select id="uFreq">${[1,3,6,12].map(k=>`<option value="${k}" ${e&&e.freq===k?"selected":""}>${T.freqSub[k]}</option>`).join("")}</select></div></div>
+  <div class="row">${input("uNext",T.nextDate,"date",e?.next||t)}${input("uTrial",T.trialEnd,"date",e?.trialEnd||"")}</div>
+  ${S.accounts.some(a=>!a.spend)?`<div class="field"><label for="uRes">${T.whereRes}</label><select id="uRes"><option value="">${T.whereVirtual}</option>${S.accounts.filter(a=>!a.spend).map(a=>`<option value="${a.id}" ${e?.reserveAcc===a.id?"selected":""}>${esc(a.name)}</option>`).join("")}</select><span class="muted" style="font-size:.85rem">${T.whereHint}</span></div>`:""}
+  <div class="row"><button class="btn" data-act="save-sub">${e?T.editBill:T.addSub}</button>${e?`<button class="btn ghost" data-act="cancel-edit">${T.cancel}</button>`:""}</div>
+  <h2>${T.upcoming}</h2>
+  ${subs.length?`<ul class="list">${subs.map(b=>`<li><div><div>${esc(b.name)}${b.trialEnd&&b.trialEnd>=t?`<span class="tag">${T.trialTag(niceDate(b.trialEnd))}</span>`:""}${b.next<t?`<span class="tag">${T.late}</span>`:""}</div>
+    <div class="meta">${niceDate(b.next)} · ${T.freqSub[b.freq]||T.freqBill[b.freq]}${b.freq>1?` · ${T.monthlyEq(money(b.amount/b.freq))}`:""}${resAcc(b)?` · ${T.resIn(esc(resAcc(b).name))}`:""}</div></div>
+    <div style="text-align:right"><div class="amt">${money(b.amount)}</div><button class="btn small" data-pay="${b.id}">${T.paid}</button>
+    <button class="linkbtn" data-cancelsub="${b.id}">${T.cancelled}</button> <button class="linkbtn" data-edit="sub:${b.id}">${T.edit}</button> ${delBtn("b",b.id)}</div></li>`).join("")}</ul>`:`<p class="empty">${T.noSubs}</p>`}`;
+}
+function viewGastos(){
+  const subs={dia:viewHist,recibos:viewRecibos,subs:viewSubs,deudas:viewDeudas};
+  return `<h1 style="font-size:1.9rem">${T.tabs.gastos}</h1>
+  <div class="seg" role="group">${Object.entries(T.gsub).map(([k,v])=>`<button data-gsub="${k}" aria-pressed="${gsub===k}">${v}</button>`).join("")}</div>
+  ${subs[gsub]()}`;
+}
+
+
+/* ---------- Ayuda ---------- */
+function viewHelp(){
+  const H=T.help;
+  return `<button class="howbtn" style="margin-top:0" data-act="help-back">← ${H.back}</button>
+  <h1 style="font-size:1.9rem;margin-top:10px">${H.title}</h1>
+  <p class="muted" style="margin-top:8px">${H.intro}</p>
+  <h2>${H.startT}</h2><ol style="padding-left:20px;margin:0">${H.start.map(x=>`<li style="margin:6px 0">${x}</li>`).join("")}</ol>
+  <h2>${H.numT}</h2><p>${H.num}</p>
+  <h2>${H.faqT}</h2>
+  ${H.faq.map(([q,a])=>`<details class="faq"><summary>${q}</summary><p>${a}</p></details>`).join("")}
+  <p class="muted" style="margin-top:20px">${H.more}</p>
+  <p class="muted" style="margin-top:10px;font-size:.86rem">${H.legal}</p>`;
+}
+
+function viewAjustes(){
+  return `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h1 style="font-size:1.9rem">${T.settingsTitle}</h1><button class="btn small" data-act="help">${T.help.btn}</button></div>
+  <h2>${T.accTitle}</h2><p class="muted" style="margin-bottom:10px">${T.accHint} ${T.balanceHint}</p>
+  ${S.accounts.map((a,i)=>`<div class="log" style="margin-top:12px;padding:12px">
+    <div class="row">${input("accN-"+a.id,T.accName,"text",a.name,'maxlength="30"')}${input("accB-"+a.id,T.accBal,"number",a.balance.toFixed(2))}</div>
+    <label class="check" style="margin:0"><input id="accS-${a.id}" type="checkbox" ${a.spend?"checked":""}><span>${T.accSpend}</span></label>
+    ${S.accounts.length>1?`<div style="margin-top:6px">${delBtn("a",a.id)}</div>`:""}</div>`).join("")}
+  <div class="row" style="margin-top:12px"><button class="btn" data-act="save-acc">${T.accSave}</button>
+  ${S.accounts.length<3?`<button class="btn ghost" data-act="add-acc">${T.accAdd}</button>`:`<span class="muted" style="align-self:center">${T.accMax}</span>`}</div>
+  <label class="check" style="margin-top:14px"><input id="wRec" type="checkbox" ${S.weeklyRecon?"checked":""}><span>${T.reconWeekly}</span></label>
+  <button class="btn ghost small" data-act="recon-open">${T.recon}</button>
+  <h2>${T.cushion}</h2>
+  <div class="row">${input("aCush",T.cushion,"number",S.cushion.toFixed(2),'min="0"')}${input("aAside",T.aside,"number",S.aside.toFixed(2),'min="0"')}</div>
+  <button class="btn" data-act="save-set">${T.update}</button>
+  <h2>${T.language}</h2>
+  <div class="row">${Object.entries(LANGS).map(([k,v])=>`<button class="btn small ${S.lang===k?"":"ghost"}" data-lang="${k}">${v.name}</button>`).join("")}</div>
+  <h2>${T.currency}</h2><p class="muted" style="margin-bottom:10px">${T.currencyHint}</p>
+  <div class="row">${Object.entries(CURRENCIES).map(([k,v])=>`<button class="btn small ${S.currency===k?"":"ghost"}" data-cur="${k}">${v.name}</button>`).join("")}</div>
+  <h2>${T.theme}</h2><div class="row">${Object.entries(T.themes).map(([k,v])=>`<button class="btn small ${S.theme===k?"":"ghost"}" data-theme-set="${k}">${v}</button>`).join("")}</div>
+  <h2>${T.backup}</h2><p class="muted" style="margin-bottom:10px">${T.backupHint}</p>
+  <textarea id="bk" aria-label="${T.backup}">${esc(JSON.stringify(S))}</textarea>
+  <div class="row" style="margin-top:8px"><button class="btn small" data-act="copy">${T.copy}</button><button class="btn small ghost" data-act="restore">${T.restore}</button></div>
+  <h2>${T.dataTitle}</h2><div class="row"><button class="btn small ghost" data-act="example">${T.example}</button>
+  ${confirmDel==="all"?`<button class="btn small" data-act="empty">${T.emptySure}</button><button class="linkbtn" data-act="cancel-del">${T.cancel}</button>`:`<button class="btn small ghost" data-act="ask-empty">${T.empty}</button>`}</div>`;
+}
+
+function render(){
+  document.documentElement.dataset.appTheme=S.theme;   // "auto" deja mandar al sistema; "light"/"dark" se imponen
+  const views={hoy:viewHoy,gastos:viewGastos,ingresos:viewIngresos,mes:viewMes,ajustes:()=>showHelp?viewHelp():viewAjustes()};
+  document.getElementById("app").innerHTML=views[tab]()+(flash?`<p role="status" class="muted" style="margin-top:14px">${flash}</p>`:"");
+  flash="";
+  document.getElementById("nav").innerHTML=Object.entries(T.tabs).map(([k,v])=>`<button data-tab="${k}" ${tab===k?'aria-current="page"':""}>${v}</button>`).join("");
+}
+
+/* ======================= EVENTOS ======================= */
+const num=id=>{const el=document.getElementById(id);return el?parseFloat(String(el.value).replace(",",".")):NaN;};
+const val=id=>{const el=document.getElementById(id);return el?el.value.trim():"";};
+document.addEventListener("change",e=>{ if(e.target.dataset.hf!==undefined){hf[e.target.dataset.hf]=e.target.value; return render();} if(e.target.dataset.away) awayChoice[e.target.dataset.away]=e.target.value; if(e.target.id==="wRec"){S.weeklyRecon=e.target.checked; save();} });
+document.addEventListener("click",e=>{
+  const el=e.target.closest("button"); if(!el) return; const d=el.dataset;
+  if(d.tab){tab=d.tab;showHow=false;showRecon=false;showCsv=false;showHelp=false;editing=null;confirmDel=null;render();window.scrollTo(0,0);return;}
+  if(d.quick){const i=document.getElementById("sAmt");i.value=d.quick;i.focus();return;}
+  if(d.delSpend) return removeSpend(d.delSpend);
+  if(d.mview){mview=d.mview;return render();}
+  if(d.moff){moff=Math.max(0,moff+Number(d.moff));return render();}
+  if(d.yoff){yoff=Math.max(0,yoff+Number(d.yoff));return render();}
+  if(d.gsub){gsub=d.gsub;editing=null;confirmDel=null;showCsv=false;return render();}
+  if(d.cancelsub){const b=S.bills.find(x=>x.id===d.cancelsub); if(b){flash=T.cancelSaved(money(b.amount/(b.freq||1)*12)); S.bills=S.bills.filter(x=>x.id!==b.id); save();} return render();}
+  if(d.trialkeep){const b=S.bills.find(x=>x.id===d.trialkeep); if(b){delete b.trialEnd; save();} return render();}
+  if(d.trialcancel){const b=S.bills.find(x=>x.id===d.trialcancel); if(b){flash=T.cancelSaved(money(b.amount/(b.freq||1)*12)); S.bills=S.bills.filter(x=>x.id!==b.id); save();} return render();}
+  if(d.pay) return payBill(d.pay);
+  if(d.paydebt) return payDebtMin(d.paydebt);
+  if(d.recv) return receiveIncome(d.recv);
+  if(d.askDel){confirmDel=d.askDel.replace(":","");return render();}
+  if(d.del){const [k,id]=d.del.split(":"); if(k==="s"){const sp=S.spends.find(x=>x.id===id); if(sp) adj(sp.amount,sp.acc); S.spends=S.spends.filter(x=>x.id!==id);}
+    if(k==="b")S.bills=S.bills.filter(x=>x.id!==id); if(k==="d")S.debts=S.debts.filter(x=>x.id!==id); if(k==="i")S.incomes=S.incomes.filter(x=>x.id!==id);
+    if(k==="a"&&S.accounts.length>1){S.accounts=S.accounts.filter(x=>x.id!==id); if(!S.accounts.some(a=>a.spend)) S.accounts[0].spend=true;}
+    confirmDel=null; save(); return render();}
+  if(d.edit){const [k,id]=d.edit.split(":"); editing={kind:k,id}; render(); window.scrollTo(0,0); return;}
+  if(d.themeSet){S.theme=d.themeSet;save();return render();}
+  if(d.lang){S.lang=d.lang;setLang();save();return render();}
+  if(d.cur){S.currency=d.cur;setLang();save();return render();}
+  switch(d.act){
+    case "how": showHow=!showHow; return render();
+    case "n-half": return resolveNudge(.5);
+    case "n-all": return resolveNudge(1);
+    case "n-keep": return resolveNudge(0);
+    case "cancel-del": confirmDel=null; return render();
+    case "cancel-edit": editing=null; return render();
+    case "log": {const a=num("sAmt"); if(!(a>0)) return; return logSpend(a,val("sCat"),val("sNote"),val("sAcc"));}
+    case "save-bill": {
+      const n=val("bName"),a=num("bAmt"),f=Number(val("bFreq")),nx=val("bNext");
+      if(!n||!(a>0)||!nx){flash=T.invalid;return render();}
+      const pr=document.getElementById("bPro").checked&&f>=2;
+      const item={name:n,amount:a,freq:f,next:nx,prorate:pr,reserveAcc:pr?val("bRes"):""};
+      if(editing&&editing.kind==="b") Object.assign(S.bills.find(x=>x.id===editing.id),item); else S.bills.push({id:uid(),kind:"bill",...item});
+      editing=null; save(); return render();
+    }
+    case "save-inc": {
+      const n=val("iName"),a=num("iAmt"),f=val("iFreq"),nx=val("iNext");
+      if(!n||!(a>0)||!nx){flash=T.invalid;return render();}
+      const isPay=document.getElementById("iPay").checked&&f!=="once";
+      const item={name:n,amount:a,freq:f,next:nx,isPay};
+      if(isPay) S.incomes.forEach(x=>x.isPay=false);          // solo una nómina marca el periodo
+      if(editing&&editing.kind==="i") Object.assign(S.incomes.find(x=>x.id===editing.id),item); else S.incomes.push({id:uid(),...item});
+      editing=null; save(); return render();
+    }
+    case "save-debt": {
+      const n=val("dName"),b=num("dBal"),r=num("dRate"),m=num("dMin"),nx=val("dNext");
+      if(!n||!(b>=0)||!(r>=0)||!(m>0)||!nx){flash=T.invalid;return render();}
+      const item={name:n,balance:b,rate:r,min:m,next:nx};
+      if(editing&&editing.kind==="d") Object.assign(S.debts.find(x=>x.id===editing.id),item); else S.debts.push({id:uid(),...item});
+      editing=null; save(); return render();
+    }
+    case "hist": tab="gastos"; gsub="dia"; editing=null; render(); window.scrollTo(0,0); return;
+    case "recon-open": tab="hoy"; showRecon=true; S.away=null; render(); window.scrollTo(0,0); return;
+    case "help": tab="ajustes"; showHelp=true; render(); window.scrollTo(0,0); return;
+    case "help-back": showHelp=false; render(); window.scrollTo(0,0); return;
+    case "recon-cancel": showRecon=false; return render();
+    case "recon-later": S.reconSnooze=todayStr(); S.reconPrompt=null; save(); return render();
+    case "recon-do": { const reg=document.getElementById("recU").checked; const r=doReconcile("rec-",reg); showRecon=false; save(); flash=reconMsg(r); return render(); }
+    case "save-sub": {
+      const n=val("uName"),a=num("uAmt"),f=Number(val("uFreq")),nx=val("uNext"),tr=val("uTrial");
+      if(!n||!(a>0)||!nx){flash=T.invalid;return render();}
+      const item={kind:"sub",name:n,amount:a,freq:f,next:nx,prorate:f>=2,trialEnd:tr||null,reserveAcc:f>=2?val("uRes"):""};
+      if(editing&&editing.kind==="sub") Object.assign(S.bills.find(x=>x.id===editing.id),item); else S.bills.push({id:uid(),...item});
+      editing=null; save(); return render();
+    }
+    case "csv": showCsv=!showCsv; return render();
+    case "copy-csv": {const t=document.getElementById("csvTxt"); (navigator.clipboard?navigator.clipboard.writeText(t.value):Promise.reject()).then(()=>{flash=T.copied;render();}).catch(()=>t.select()); return;}
+    case "save-spend": {
+      const sp=S.spends.find(x=>x.id===editing.id); const a=num("eAmt"), dt=val("eDate"); if(!sp||!(a>0)||!dt){flash=T.invalid;return render();}
+      adj(sp.amount,sp.acc);                     // deshacer el gasto original
+      sp.amount=a; sp.date=dt; sp.cat=val("eCat"); sp.note=val("eNote"); if(document.getElementById("eAcc")) sp.acc=val("eAcc");
+      adj(-a,sp.acc);                            // aplicar el gasto corregido
+      editing=null; save(); flash=T.savedMsg; return render();
+    }
+    case "add-acc": if(S.accounts.length<3){S.accounts.push({id:uid(),name:T.accN(S.accounts.length+1),balance:0,spend:false}); save();} return render();
+    case "save-acc": {
+      S.accounts.forEach(a=>{ const n=val("accN-"+a.id), b=num("accB-"+a.id); if(n) a.name=n; if(!isNaN(b)) a.balance=b; a.spend=document.getElementById("accS-"+a.id).checked; });
+      if(!S.accounts.some(a=>a.spend)) S.accounts[0].spend=true;
+      S.demo=false; save(); flash=T.savedMsg; return render();
+    }
+    case "save-limits": { document.querySelectorAll("[data-limit]").forEach(inp=>{ const v=parseFloat(inp.value); if(v>0) S.limits[inp.dataset.limit]=v; else delete S.limits[inp.dataset.limit]; }); save(); flash=T.savedMsg; return render(); }
+    case "save-extra": {const x=num("dExtra"); if(x>=0){S.debtExtra=x;save();} return render();}
+    case "extra-pay": {const a=num("xAmt"), id=val("xDebt"), dd=S.debts.find(x=>x.id===id); if(!dd||!(a>0)) return;
+      const p=Math.min(a,dd.balance); dd.balance-=p; adj(-p); S.tx.push({type:"debt",amount:p,name:dd.name,date:todayStr()}); save(); flash=T.savedMsg; return render();}
+    case "away-done": {
+      const a=S.away;
+      a.bills.forEach(id=>{ (awayChoice["b:"+id]??"yes")==="yes" ? payBill(id,true) : skipBill(id); });
+      a.debts.forEach(id=>{ if((awayChoice["d:"+id]??"yes")==="yes") payDebtMin(id,true); else {const x=S.debts.find(z=>z.id===id); if(x) x.next=addMonths(x.next,1);} });
+      a.inc.forEach(id=>{ (awayChoice["i:"+id]??"yes")==="yes" ? receiveIncome(id,true) : skipIncome(id); });
+      const r=doReconcile("awBal-",true);   // el saldo real manda; la diferencia queda registrada
+      S.away=null; awayChoice={}; save(); flash=reconMsg(r); return render();
+    }
+    case "away-fresh": {
+      const t=todayStr();
+      S.bills.forEach(x=>{ while(x.freq>0&&x.next<t) x.next=addMonths(x.next,x.freq); }); S.bills=S.bills.filter(x=>!(x.freq===0&&x.next<t));
+      S.debts.forEach(x=>{ while(x.next<t) x.next=addMonths(x.next,1); });
+      S.incomes.forEach(x=>{ while(x.freq!=="once"&&x.next<t) x.next=nextIncomeDate(x); });
+      doReconcile("awBal-",false); S.away=null; save(); return render();}
+    case "away-dismiss": S.away=null; save(); return render();
+    case "save-set": {const c=num("aCush"),s=num("aAside"); if(c>=0)S.cushion=c; if(s>=0)S.aside=s; S.demo=false; save(); flash=T.savedMsg; return render();}
+    case "copy": {const t=document.getElementById("bk"); (navigator.clipboard?navigator.clipboard.writeText(t.value):Promise.reject()).then(()=>{flash=T.copied;render();}).catch(()=>t.select()); return;}
+    case "restore": {try{const x=JSON.parse(document.getElementById("bk").value); if(!x||!x.v||!Array.isArray(x.bills)) throw 0; S=normalize(x); setLang(); save(); flash=T.restored;}catch(err){flash=T.badData;} return render();}
+    case "example": S=seedHistory(exampleState(S.lang,S.currency)); save(); tab="hoy"; return render();
+    case "ask-empty": confirmDel="all"; return render();
+    case "empty": S={...exampleState(S.lang,S.currency),demo:false,accounts:[{id:uid(),name:T.defAcc,balance:0,spend:true}],cushion:0,debtExtra:0,incomes:[],bills:[],debts:[],spends:[],tx:[],limits:{}}; confirmDel=null; save(); tab="ajustes"; return render();
+  }
+});
+document.addEventListener("keydown",e=>{ if(e.key==="Enter"&&e.target.id==="sAmt") document.querySelector('[data-act="log"]').click(); });
+render();
+
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}
+</script>
+</body>
+</html>
