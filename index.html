@@ -243,6 +243,9 @@ function makeT(lang){
         ["What do I do with a bonus?","Add it in Income as “Just once”. When received, the app asks whether to set part of it aside."],
         ["The app's balance doesn't match my bank.","That's normal. Use “Match balance with bank”. Differences are recorded as “Unlogged” spending or an adjustment."],
         ["How do I fix a wrong spend?","Spending → Day to day → Edit or Delete. The balance corrects itself."],
+        ["I marked a bill as paid by mistake.","Paid bills, subscriptions and debt payments appear in Spending → Day to day. Tap “Undo payment”: the money goes back to the account it came from and the bill is pending again. You can also edit the amount or date."],
+        ["My electricity bill is different every month.","When you tap “Paid”, type the real amount. The bill keeps its usual amount for the coming months' calculation."],
+        ["I marked income as received by mistake.","Income → Income received → “Undo”. The balance is corrected and the income is pending again."],
         ["Does my data sync between devices?","No. Use Settings → Backup → Copy, then Restore on the other device."],
         ["Where is my data stored?","Only in this browser, on this device. Clearing browser data or private mode can erase it. Back up regularly."],
         ["I move the money for yearly bills to another account. What do I do?","In that bill or subscription, under “Where do you keep the money set aside?”, choose that account. The app stops deducting it from your available money, and when matching your balance it tells you how much should be there."],
@@ -262,7 +265,15 @@ function makeT(lang){
     catTitle:"Day-to-day spending by category",catTotal:"spent",catNone:"No day-to-day spending recorded.",
     yrMonths:"Month by month",yrSubs:"Subscriptions paid",yrSubsHint:"Only charges marked as paid in the app.",
     yrComp:(y,a,b,c)=>`Same period in ${y}: ${a} came in, ${b} went out, savings rate ${c}.`,
-    savedMsg:"Saved",invalid:"Check the name, amount and date."
+    savedMsg:"Saved",invalid:"Check the name, amount and date.",
+    tBill:"Bill",tSub:"Subscription",tDebt:"Debt",tAdj:"Adjustment",typeLbl:"Type",allTypes:"Everything",typeDia:"Day to day",
+    histTotalMv:(n,x)=>`${n} ${n===1?"entry":"entries"} · ${x}`,
+    undoPay:"Undo payment",undoRecv:"Undo",undoSure:"Sure? Yes, undo",
+    undoLegacy:"Recorded with an earlier version: the amount goes back to your main account. Check the next date of the bill or income afterwards.",
+    undone:"Undone. Balance corrected and the item is pending again.",undoneLegacy:"Undone. Balance corrected. Check the next date in Bills, Debts or Income.",
+    editPay:"Edit payment",editRecv:"Edit income received",payAmtLbl:"Amount charged",confirm:"Confirm",
+    paidMsg:"Payment recorded. You'll find it in Spending → Day to day.",
+    recvTitle:"Income received",noRecv:"You haven't marked any income as received yet.",showAll:n=>`Show all (${n})`,showLess:"Show fewer"
   };
   return {
     tabs:{hoy:"Hoy",gastos:"Gastos",ingresos:"Ingresos",mes:"Mes",ajustes:"Ajustes"},
@@ -356,6 +367,9 @@ function makeT(lang){
         ["¿Qué hago con la paga extra?","Añádela en Ingresos como «Solo una vez». Al cobrarla, la app te pregunta si quieres apartar una parte."],
         ["El saldo de la app no coincide con el del banco.","Es normal. Usa «Cuadrar saldo con el banco». La diferencia se registra como gasto «Sin apuntar» o como ajuste."],
         ["¿Cómo corrijo un gasto mal apuntado?","Gastos → Día a día → Editar o Borrar. El saldo se corrige solo."],
+        ["Marqué un recibo como pagado por error.","Los recibos, suscripciones y cuotas de deuda pagados aparecen en Gastos → Día a día. Pulsa «Deshacer pago»: el dinero vuelve a la cuenta de la que salió y el recibo queda otra vez pendiente. También puedes corregir el importe o la fecha."],
+        ["Mi recibo de la luz cambia cada mes.","Al pulsar «Pagado», escribe el importe real. El recibo conserva su importe habitual para calcular los próximos meses."],
+        ["Marqué un cobro por error.","Ingresos → Cobros registrados → «Deshacer cobro». El saldo se corrige y el ingreso vuelve a quedar pendiente."],
         ["¿Se sincronizan mis datos entre dispositivos?","No. Usa Ajustes → Copia de seguridad → Copiar, y Restaurar en el otro dispositivo."],
         ["¿Dónde se guardan mis datos?","Solo en este navegador, en este dispositivo. Borrar los datos del navegador o el modo privado pueden eliminarlos. Haz copias a menudo."],
         ["Paso el dinero de los gastos anuales a otra cuenta. ¿Qué hago?","En ese recibo o suscripción, en «¿Dónde guardas lo apartado?», elige esa cuenta. La app deja de restarlo de tu disponible y, al cuadrar, te dice cuánto debería haber en ella."],
@@ -375,7 +389,15 @@ function makeT(lang){
     catTitle:"Gastos del día a día por categoría",catTotal:"gastado",catNone:"No hay gastos del día a día registrados.",
     yrMonths:"Mes a mes",yrSubs:"Suscripciones pagadas",yrSubsHint:"Solo los cargos marcados como pagados en la app.",
     yrComp:(y,a,b,c)=>`Mismo periodo de ${y}: entraron ${a}, salieron ${b}, tasa de ahorro ${c}.`,
-    savedMsg:"Guardado",invalid:"Revisa el nombre, el importe y la fecha."
+    savedMsg:"Guardado",invalid:"Revisa el nombre, el importe y la fecha.",
+    tBill:"Recibo",tSub:"Suscripción",tDebt:"Deuda",tAdj:"Ajuste",typeLbl:"Tipo",allTypes:"Todo",typeDia:"Día a día",
+    histTotalMv:(n,x)=>`${n} ${n===1?"movimiento":"movimientos"} · ${x}`,
+    undoPay:"Deshacer pago",undoRecv:"Deshacer cobro",undoSure:"¿Seguro? Sí, deshacer",
+    undoLegacy:"Registrado con una versión anterior: el importe vuelve a la cuenta principal. Después revisa la próxima fecha del recibo o ingreso.",
+    undone:"Deshecho. Saldo corregido y vuelve a estar pendiente.",undoneLegacy:"Deshecho. Saldo corregido. Revisa la próxima fecha en Recibos, Deudas o Ingresos.",
+    editPay:"Editar pago",editRecv:"Editar cobro",payAmtLbl:"Importe cargado",confirm:"Confirmar",
+    paidMsg:"Pago registrado. Lo verás en Gastos → Día a día.",
+    recvTitle:"Cobros registrados",noRecv:"Aún no has marcado ningún cobro.",showAll:n=>`Ver todos (${n})`,showLess:"Ver menos"
   };
 }
 
@@ -433,12 +455,13 @@ function exampleState(lang,currency){
       {id:uid(),name:N.card,balance:1100,rate:21.8,min:45,next:addDays(t,10)}],
     spends:[],tx:[],limits:{}};
 }
+function txIds(x){ (x.tx||[]).forEach(t=>{ if(!t.id){ t.id=uid(); if(!t.splits) t.legacy=true; } }); }
 function normalize(x){
   if(x.variant){ x.lang=x.lang||"es"; x.currency=x.currency||(x.variant==="es-US"?"USD":"EUR"); delete x.variant; }
   x.v=3; x.lang=LANGS[x.lang]?x.lang:"es"; x.currency=CURRENCIES[x.currency]?x.currency:"EUR";
   x.incomes=x.incomes||[]; x.bills=x.bills||[]; x.spends=x.spends||[]; x.debts=x.debts||[]; x.debtExtra=x.debtExtra||0;
   if(!Array.isArray(x.accounts)||!x.accounts.length) x.accounts=[{id:uid(),name:x.lang==="en"?"Main account":"Cuenta principal",balance:typeof x.balance==="number"?x.balance:0,spend:true}];
-  delete x.balance; x.tx=x.tx||[]; x.limits=x.limits||{};
+  delete x.balance; x.tx=x.tx||[]; txIds(x); x.limits=x.limits||{};
   // categorías: de nombre a clave interna (para que se traduzcan)
   x.spends.forEach(sp=>{ if(CAT_LEGACY[sp.cat]) sp.cat=CAT_LEGACY[sp.cat]; else if(!CAT_KEYS.includes(sp.cat)&&sp.cat!=="unlogged") sp.cat="other"; });
   const lim={}; Object.entries(x.limits).forEach(([k,v])=>{ lim[CAT_LEGACY[k]||k]=v; }); x.limits=lim;
@@ -461,7 +484,7 @@ function seedHistory(x){
     for(let d=1;d<=lastDay;d++){ if(rnd()<.55){ let u=rnd(),c=0,acc=0; for(;c<w.length-1;c++){acc+=w[c]; if(u<acc)break;}
       x.spends.push({id:uid(),amount:Math.round((4+rnd()*38)*(c===0?1.1:1)*100)/100,cat:CAT_KEYS[c],note:"",date:base.slice(0,8)+pad(d)}); } }
   }
-  x.spends.sort((a,b)=>b.date.localeCompare(a.date)); x.limits={leisure:120,food:300}; return x;
+  x.spends.sort((a,b)=>b.date.localeCompare(a.date)); x.limits={leisure:120,food:300}; txIds(x); return x;
 }
 if(S.demo&&!S.tx.length) seedHistory(S);
 setLang();
@@ -520,15 +543,39 @@ function logSpend(a,cat,note,acc){
   const ac=accById(acc); ac.balance-=a; S.spends.unshift({id:uid(),amount:a,cat,note,acc:ac.id,date:todayStr()}); S.spends=S.spends.slice(0,3000); S.tx=S.tx.slice(-1500); save(); render();
 }
 function removeSpend(id){const s=S.spends.find(x=>x.id===id); if(!s)return; adj(s.amount,s.acc); S.spends=S.spends.filter(x=>x.id!==id); save(); render();}
-function payBill(id,silent){const b=S.bills.find(x=>x.id===id); if(!b)return; const ra=resAcc(b); if(ra){ const fromRes=Math.min(b.amount,Math.max(0,ra.balance)); adj(-fromRes,ra.id); if(b.amount-fromRes>0.005) adj(-(b.amount-fromRes)); } else adj(-b.amount); S.tx.push({type:"bill",amount:b.amount,name:b.name,sub:b.kind==="sub",date:todayStr()}); if(b.freq===0) S.bills=S.bills.filter(x=>x.id!==id); else b.next=addMonths(b.next,b.freq); save(); if(!silent) render();}
+const mover=splits=>(d,acc)=>{const ac=accById(acc); ac.balance+=d; const sp=splits.find(x=>x.acc===ac.id); if(sp) sp.amount+=d; else splits.push({acc:ac.id,amount:d});};
+const pushTx=o=>{o.id=uid(); S.tx.push(o); return o;};
+function payBill(id,silent,amt){const b=S.bills.find(x=>x.id===id); if(!b)return; const a=amt>0?amt:b.amount, splits=[], mv=mover(splits);
+  const ra=resAcc(b); if(ra){ const fromRes=Math.min(a,Math.max(0,ra.balance)); if(fromRes>0) mv(-fromRes,ra.id); if(a-fromRes>0.005) mv(-(a-fromRes)); } else mv(-a);
+  const t={type:"bill",amount:a,name:b.name,sub:b.kind==="sub",date:todayStr(),ref:b.id,splits,prevNext:b.next};
+  if(b.freq===0){ t.snap={...b}; S.bills=S.bills.filter(x=>x.id!==id); } else { b.next=addMonths(b.next,b.freq); t.newNext=b.next; }
+  pushTx(t); save(); if(!silent) render();}
 function skipBill(id){const b=S.bills.find(x=>x.id===id); if(!b)return; if(b.freq===0) S.bills=S.bills.filter(x=>x.id!==id); else b.next=addMonths(b.next,b.freq);}
-function payDebtMin(id,silent){const d=S.debts.find(x=>x.id===id); if(!d)return; const p=Math.min(d.min,d.balance+d.balance*d.rate/1200);
-  adj(-p); S.tx.push({type:"debt",amount:p,name:d.name,date:todayStr()}); d.balance=Math.max(0,d.balance+d.balance*d.rate/1200-p); d.next=addMonths(d.next,1); save(); if(!silent) render();}
-function receiveIncome(id,silent){const i=S.incomes.find(x=>x.id===id); if(!i)return; adj(i.amount); S.tx.push({type:"income",amount:i.amount,name:i.name,date:todayStr()});
-  if(i.freq==="once"){S.incomes=S.incomes.filter(x=>x.id!==id); S.nudge={amount:i.amount,name:i.name};} else i.next=nextIncomeDate(i);
+function payDebtMin(id,silent){const d=S.debts.find(x=>x.id===id); if(!d)return; const p=Math.min(d.min,d.balance+d.balance*d.rate/1200), splits=[];
+  mover(splits)(-p); const nb=Math.max(0,d.balance+d.balance*d.rate/1200-p);
+  const t={type:"debt",amount:p,name:d.name,date:todayStr(),ref:d.id,splits,prevNext:d.next,balDelta:d.balance-nb};
+  d.balance=nb; d.next=addMonths(d.next,1); t.newNext=d.next; pushTx(t); save(); if(!silent) render();}
+function receiveIncome(id,silent){const i=S.incomes.find(x=>x.id===id); if(!i)return; const splits=[]; mover(splits)(i.amount);
+  const t=pushTx({type:"income",amount:i.amount,name:i.name,date:todayStr(),ref:i.id,splits,prevNext:i.next,pay:!!i.isPay});
+  if(i.freq==="once"){ t.snap={...i}; S.incomes=S.incomes.filter(x=>x.id!==id); S.nudge={amount:i.amount,name:i.name,tx:t.id}; } else { i.next=nextIncomeDate(i); t.newNext=i.next; }
   if(i.isPay) S.reconPrompt="pay";
   save(); if(!silent) render();}
 function skipIncome(id){const i=S.incomes.find(x=>x.id===id); if(!i)return; if(i.freq==="once") S.incomes=S.incomes.filter(x=>x.id!==id); else i.next=nextIncomeDate(i);}
+/* Deshacer un pago o cobro: devuelve el dinero a sus cuentas y deja el elemento como estaba */
+function undoTx(id){const t=S.tx.find(x=>x.id===id); if(!t) return;
+  if(t.splits) t.splits.forEach(sp=>adj(-sp.amount,sp.acc)); else adj(t.type==="income"?-t.amount:t.amount);
+  if(t.type==="bill"){ const b=S.bills.find(x=>x.id===t.ref); if(b){ if(t.newNext&&b.next===t.newNext) b.next=t.prevNext; } else if(t.snap) S.bills.push(t.snap); }
+  if(t.type==="debt"){ const d=S.debts.find(x=>x.id===t.ref); if(d){ if(t.balDelta) d.balance+=t.balDelta; if(t.newNext&&d.next===t.newNext) d.next=t.prevNext; } }
+  if(t.type==="income"){ const i=S.incomes.find(x=>x.id===t.ref); if(i){ if(t.newNext&&i.next===t.newNext) i.next=t.prevNext; } else if(t.snap) S.incomes.push(t.snap);
+    if(S.nudge&&S.nudge.tx===t.id) S.nudge=null; if(t.aside) S.aside=Math.max(0,S.aside-t.aside); if(t.pay&&S.reconPrompt==="pay") S.reconPrompt=null; }
+  S.tx=S.tx.filter(x=>x!==t); flash=t.legacy?T.undoneLegacy:T.undone; save(); render();}
+/* Corregir importe o fecha de un pago o cobro ya registrado */
+function editTx(id,amt,date){const t=S.tx.find(x=>x.id===id); if(!t) return; const diff=amt-t.amount;
+  if(Math.abs(diff)>0.004){ const sign=t.type==="income"?1:-1;
+    if(t.splits&&t.splits.length){ const sp=t.splits.find(x=>accById(x.acc).spend)||t.splits[0]; adj(sign*diff,sp.acc); sp.amount+=sign*diff; } else adj(sign*diff);
+    if(t.type==="debt"){ const d=S.debts.find(x=>x.id===t.ref); if(d){ d.balance=Math.max(0,d.balance-diff); t.balDelta=(t.balDelta||0)+diff; } }
+    t.amount=amt; }
+  if(date) t.date=date; save();}
 function doReconcile(prefix,register){
   let neg=0,pos=0,changed=false; const t=todayStr();
   S.accounts.forEach(ac=>{
@@ -537,7 +584,7 @@ function doReconcile(prefix,register){
     const diff=Math.round((real-ac.balance)*100)/100; if(Math.abs(diff)<0.01) return;
     if(ac.spend&&register){
       if(diff<0) S.spends.unshift({id:uid(),amount:-diff,cat:"unlogged",note:"",acc:ac.id,date:t});
-      else S.tx.push({type:"income",amount:diff,name:T.adjustIn,date:t});
+      else pushTx({type:"income",kind:"adjust",amount:diff,name:T.adjustIn,date:t,splits:[{acc:ac.id,amount:diff}]});
     }
     if(ac.spend){ if(diff<0) neg+=-diff; else pos+=diff; }
     ac.balance=real; changed=true;
@@ -547,12 +594,23 @@ function doReconcile(prefix,register){
   return {neg,pos,short,changed};
 }
 function reconMsg(r){ const base=(r.neg||r.pos)?T.reconResult(r.neg?money(r.neg):"",r.pos?money(r.pos):""):(r.changed?T.reconResult("",""):T.reconOk); return base+((r.short&&r.short.length)?" "+r.short.join(" "):""); }
-function resolveNudge(share){if(S.nudge){S.aside+=S.nudge.amount*share; S.nudge=null; save(); render();}}
+function resolveNudge(share){if(S.nudge){const add=S.nudge.amount*share; S.aside+=add; const t=S.nudge.tx&&S.tx.find(x=>x.id===S.nudge.tx); if(t&&add) t.aside=add; S.nudge=null; save(); render();}}
 
 /* ======================= VISTAS ======================= */
-let gsub="dia", showRecon=false, showHelp=false; let tab="hoy", showHow=false, flash="", editing=null, confirmDel=null, awayChoice={};
+let gsub="dia", showRecon=false, showHelp=false, paying=null, showAllRecv=false; let tab="hoy", showHow=false, flash="", editing=null, confirmDel=null, awayChoice={};
 const greet=()=>{const h=new Date().getHours();return T.greet[h<14?0:h<21?1:2];};
 const input=(id,label,type,value,extra="")=>`<div class="field"><label for="${id}">${label}</label><input id="${id}" type="${type}" ${type==="number"?'inputmode="decimal" step="0.01"':""} value="${esc(value??"")}" ${extra}></div>`;
+const txTag=t=>t.type==="bill"?(t.sub?T.tSub:T.tBill):t.type==="debt"?T.tDebt:t.kind==="adjust"?T.tAdj:"";
+const txAccs=t=>t.splits&&t.splits.length?[...new Set(t.splits.map(x=>accById(x.acc).name))].join(" + "):mainAcc().name;
+const undoBtn=t=>confirmDel==="t"+t.id?`<button class="btn small" data-del="t:${t.id}">${T.undoSure}</button> <button class="linkbtn" data-act="cancel-del">${T.cancel}</button>${t.legacy?`<p class="meta" style="max-width:240px;margin:6px 0 0 auto">${T.undoLegacy}</p>`:""}`
+  :`<button class="linkbtn" data-ask-del="t:${t.id}">${t.type==="income"?T.undoRecv:T.undoPay}</button>`;
+const txRow=t=>`<li><div><div>${esc(t.name||txTag(t)||T.tBill)}${txTag(t)?`<span class="tag" style="border-color:var(--line)">${txTag(t)}</span>`:""}</div><div class="meta">${t.type==="income"?niceDate(t.date)+(S.accounts.length>1?" · ":""):""}${S.accounts.length>1?esc(txAccs(t)):""}</div></div>
+  <div style="text-align:right"><div class="amt">${money(t.amount)}</div><button class="linkbtn" data-edit="t:${t.id}">${T.edit}</button> ${undoBtn(t)}</div></li>`;
+function txEditForm(t){ return `<section class="log"><h2 style="margin-top:0">${t.type==="income"?T.editRecv:T.editPay}: ${esc(t.name||txTag(t))}</h2>
+  <div class="row">${input("tAmt",T.amount,"number",t.amount,'min="0"')}${input("tDate",T.date,"date",t.date)}</div>
+  <div class="row"><button class="btn" data-act="save-tx">${T.editBill}</button><button class="btn ghost" data-act="cancel-edit">${T.cancel}</button></div></section>`; }
+const payCell=b=>paying===b.id?`<div class="row" style="justify-content:flex-end;align-items:flex-end;margin:6px 0 4px"><div class="field" style="max-width:130px;margin:0"><label for="payAmt">${T.payAmtLbl}</label><input id="payAmt" type="number" inputmode="decimal" step="0.01" min="0" value="${b.amount}"></div><button class="btn small" data-act="pay-ok">${T.confirm}</button><button class="linkbtn" data-act="pay-cancel">${T.cancel}</button></div>`
+  :`<button class="btn small" data-pay="${b.id}">${T.paid}</button>`;
 const delBtn=(kind,id)=>confirmDel===kind+id?`<button class="btn small" data-del="${kind}:${id}">${T.sure}</button> <button class="linkbtn" data-act="cancel-del">${T.cancel}</button>`
   :`<button class="linkbtn" data-ask-del="${kind}:${id}">${T.del}</button>`;
 
@@ -649,7 +707,7 @@ function viewRecibos(){
   <h2>${T.upcoming}</h2>
   ${bills.length?`<ul class="list">${bills.map(b=>`<li><div><div>${esc(b.name)}${b.next<t?`<span class="tag">${T.late}</span>`:""}</div>
     <div class="meta">${niceDate(b.next)} · ${T.freqBill[b.freq]}${isProrated(b)?` · ${T.prorating(money(b.amount/b.freq))}${resAcc(b)?` · ${T.resIn(esc(resAcc(b).name))}`:""}`:""}</div></div>
-    <div style="text-align:right"><div class="amt">${money(b.amount)}</div><button class="btn small" data-pay="${b.id}">${T.paid}</button>
+    <div style="text-align:right"><div class="amt">${money(b.amount)}</div>${payCell(b)}
     <button class="linkbtn" data-edit="b:${b.id}">${T.edit}</button> ${delBtn("b",b.id)}</div></li>`).join("")}</ul>`:`<p class="empty">${T.noBills}</p>`}`;
 }
 
@@ -686,7 +744,10 @@ function viewDeudas(){
 function viewIngresos(){
   const e=editing&&editing.kind==="i"?S.incomes.find(i=>i.id===editing.id):null;
   const inc=[...S.incomes].sort((a,b)=>a.next.localeCompare(b.next)), t=todayStr();
+  const et=editing&&editing.kind==="t"?S.tx.find(x=>x.id===editing.id):null;
+  const rec=S.tx.filter(x=>x.type==="income").sort((a,b)=>b.date.localeCompare(a.date)), recShown=showAllRecv?rec:rec.slice(0,10);
   return `<h1 style="font-size:1.9rem">${T.incomeTitle}</h1><p class="muted" style="margin-top:6px">${T.incomeHint}</p>
+  ${et?`<div style="margin-top:16px">${txEditForm(et)}</div>`:""}
   <h2>${e?T.edit+": "+esc(e.name):T.addIncome}</h2>
   ${input("iName",T.name,"text",e?.name,'maxlength="40"')}
   <div class="row">${input("iAmt",T.amount,"number",e?.amount,'min="0"')}
@@ -698,7 +759,9 @@ function viewIngresos(){
   <h2>${T.upcoming}</h2>
   ${inc.length?`<ul class="list">${inc.map(i=>`<li><div><div>${esc(i.name)}${i.isPay?`<span class="tag" style="border-color:var(--line)">${T.payTag}</span>`:""}${i.next<t?`<span class="tag">${T.late}</span>`:""}</div><div class="meta">${niceDate(i.next)} · ${T.freqInc[i.freq]}</div></div>
     <div style="text-align:right"><div class="amt">${money(i.amount)}</div><button class="btn small" data-recv="${i.id}">${T.received}</button>
-    <button class="linkbtn" data-edit="i:${i.id}">${T.edit}</button> ${delBtn("i",i.id)}</div></li>`).join("")}</ul>`:`<p class="empty">${T.noIncome}</p>`}`;
+    <button class="linkbtn" data-edit="i:${i.id}">${T.edit}</button> ${delBtn("i",i.id)}</div></li>`).join("")}</ul>`:`<p class="empty">${T.noIncome}</p>`}
+  <h2>${T.recvTitle}</h2>
+  ${rec.length?`<ul class="list">${recShown.map(txRow).join("")}</ul>${rec.length>10?`<button class="btn ghost small" style="margin-top:12px" data-act="recv-all">${showAllRecv?T.showLess:T.showAll(rec.length)}</button>`:""}`:`<p class="empty">${T.noRecv}</p>`}`;
 }
 
 
@@ -845,20 +908,28 @@ function viewAno(){
 
 
 /* ---------- Historial de gastos ---------- */
-let hf={month:"",cat:"",acc:""}, showCsv=false;
+let hf={month:"",cat:"",acc:"",type:""}, showCsv=false;
 function histFiltered(){
-  return S.spends.filter(s=>(!hf.month||ym(s.date)===hf.month)&&(!hf.cat||s.cat===hf.cat)&&(!hf.acc||accById(s.acc).id===hf.acc))
-    .sort((a,b)=>b.date.localeCompare(a.date));
+  const sp=(hf.type===""||hf.type==="dia")?S.spends.filter(s=>(!hf.month||ym(s.date)===hf.month)&&(!hf.cat||s.cat===hf.cat)&&(!hf.acc||accById(s.acc).id===hf.acc)).map(s=>({k:"s",o:s,date:s.date,amount:s.amount})):[];
+  const tx=(hf.cat||hf.type==="dia")?[]:S.tx.filter(t=>t.type!=="income"&&(!hf.type||(hf.type==="sub"?t.type==="bill"&&t.sub:hf.type==="bill"?t.type==="bill"&&!t.sub:t.type===hf.type))
+    &&(!hf.month||ym(t.date)===hf.month)&&(!hf.acc||(t.splits&&t.splits.length?t.splits.some(x=>accById(x.acc).id===hf.acc):mainAcc().id===hf.acc))).map(t=>({k:"t",o:t,date:t.date,amount:t.amount}));
+  return [...sp,...tx].sort((a,b)=>b.date.localeCompare(a.date));
 }
 function viewHist(){
   const e=editing&&editing.kind==="s"?S.spends.find(x=>x.id===editing.id):null;
-  const months=[...new Set(S.spends.map(s=>ym(s.date)))].sort().reverse();
+  const et=editing&&editing.kind==="t"?S.tx.find(x=>x.id===editing.id):null;
+  const months=[...new Set([...S.spends.map(s=>ym(s.date)),...S.tx.filter(t=>t.type!=="income").map(t=>ym(t.date))])].sort().reverse();
   const list=histFiltered(), total=list.reduce((s,x)=>s+x.amount,0);
-  const groups={}; list.forEach(s=>{(groups[s.date]=groups[s.date]||[]).push(s);});
-  const sep=T.csvSep; const csv=T.csvHead+"\n"+list.map(s=>[s.date,T.decComma?String(s.amount).replace(".",","):String(s.amount),catName(s.cat),(s.note||"").replace(new RegExp(sep,"g")," "),accById(s.acc).name].join(sep)).join("\n");
+  const groups={}; list.forEach(x=>{(groups[x.date]=groups[x.date]||[]).push(x);});
+  const sep=T.csvSep, dec=n=>T.decComma?String(Math.round(n*100)/100).replace(".",","):String(Math.round(n*100)/100), clean=v=>(v||"").replace(new RegExp(sep,"g")," ");
+  const csv=T.csvHead+"\n"+list.map(x=>x.k==="s"?[x.date,dec(x.amount),catName(x.o.cat),clean(x.o.note),accById(x.o.acc).name].join(sep)
+    :[x.date,dec(x.amount),txTag(x.o),clean(x.o.name),clean(txAccs(x.o))].join(sep)).join("\n");
   const opt=(v,l,cur)=>`<option value="${v}" ${cur===v?"selected":""}>${l}</option>`;
-  return `${e?"":logForm()}
+  const spRow=s=>`<li><div><div>${esc(catName(s.cat))}${s.note?` · ${esc(s.note)}`:""}</div>${S.accounts.length>1?`<div class="meta">${esc(accById(s.acc).name)}</div>`:""}</div>
+    <div style="text-align:right"><div class="amt">${money(s.amount)}</div><button class="linkbtn" data-edit="s:${s.id}">${T.edit}</button> ${delBtn("s",s.id)}</div></li>`;
+  return `${e||et?"":logForm()}
   <h2>${T.histTitle}</h2>
+  ${et?txEditForm(et):""}
   ${e?`<section class="log"><h2 style="margin-top:0">${T.editSpend}</h2>
     <div class="row">${input("eAmt",T.amount,"number",e.amount,'min="0"')}${input("eDate",T.date,"date",e.date)}</div>
     <div class="row"><div class="field"><label for="eCat">${T.category}</label><select id="eCat">${[...CAT_KEYS,"unlogged"].map(k=>opt(k,T.cats[k],e.cat)).join("")}</select></div>
@@ -867,13 +938,15 @@ function viewHist(){
     <div class="row"><button class="btn" data-act="save-spend">${T.editBill}</button><button class="btn ghost" data-act="cancel-edit">${T.cancel}</button></div></section>`:""}
   <div class="row" style="margin-top:16px">
     <div class="field"><label for="hMonth">${T.monthLbl}</label><select id="hMonth" data-hf="month">${opt("",T.allMonths,hf.month)}${months.map(m=>opt(m,toDate(m+"-01").toLocaleDateString(V.locale,{month:"long",year:"numeric"}),hf.month)).join("")}</select></div>
+    <div class="field"><label for="hType">${T.typeLbl}</label><select id="hType" data-hf="type">${opt("",T.allTypes,hf.type)}${opt("dia",T.typeDia,hf.type)}${opt("bill",T.gsub.recibos,hf.type)}${opt("sub",T.gsub.subs,hf.type)}${opt("debt",T.gsub.deudas,hf.type)}</select></div>
+  </div>
+  <div class="row">
     <div class="field"><label for="hCat">${T.category}</label><select id="hCat" data-hf="cat">${opt("",T.allCats,hf.cat)}${[...CAT_KEYS,"unlogged"].map(k=>opt(k,T.cats[k],hf.cat)).join("")}</select></div>
     ${S.accounts.length>1?`<div class="field"><label for="hAcc">${T.account}</label><select id="hAcc" data-hf="acc">${opt("",T.allAcc,hf.acc)}${S.accounts.map(a=>opt(a.id,esc(a.name),hf.acc)).join("")}</select></div>`:""}
   </div>
-  <p class="period"><strong>${T.histTotal(list.length,money(total))}</strong></p>
+  <p class="period"><strong>${T.histTotalMv(list.length,money(total))}</strong></p>
   ${list.length?Object.entries(groups).map(([d,items])=>`<h2 style="font-size:1rem;margin:18px 0 0">${niceDate(d)} · ${money(items.reduce((s,x)=>s+x.amount,0))}</h2>
-    <ul class="list">${items.map(s=>`<li><div><div>${esc(catName(s.cat))}${s.note?` · ${esc(s.note)}`:""}</div>${S.accounts.length>1?`<div class="meta">${esc(accById(s.acc).name)}</div>`:""}</div>
-    <div style="text-align:right"><div class="amt">${money(s.amount)}</div><button class="linkbtn" data-edit="s:${s.id}">${T.edit}</button> ${delBtn("s",s.id)}</div></li>`).join("")}</ul>`).join("")
+    <ul class="list">${items.map(x=>x.k==="s"?spRow(x.o):txRow(x.o)).join("")}</ul>`).join("")
   :`<p class="empty">${T.histEmpty}</p>`}
   <button class="btn ghost small" style="margin-top:18px" data-act="csv">${T.csv}</button>
   ${showCsv?`<p class="muted" style="margin:10px 0 6px">${T.csvHint}</p><textarea id="csvTxt">${esc(csv)}</textarea><button class="btn small" style="margin-top:8px" data-act="copy-csv">${T.copy}</button>`:""}
@@ -900,7 +973,7 @@ function viewSubs(){
   <h2>${T.upcoming}</h2>
   ${subs.length?`<ul class="list">${subs.map(b=>`<li><div><div>${esc(b.name)}${b.trialEnd&&b.trialEnd>=t?`<span class="tag">${T.trialTag(niceDate(b.trialEnd))}</span>`:""}${b.next<t?`<span class="tag">${T.late}</span>`:""}</div>
     <div class="meta">${niceDate(b.next)} · ${T.freqSub[b.freq]||T.freqBill[b.freq]}${b.freq>1?` · ${T.monthlyEq(money(b.amount/b.freq))}`:""}${resAcc(b)?` · ${T.resIn(esc(resAcc(b).name))}`:""}</div></div>
-    <div style="text-align:right"><div class="amt">${money(b.amount)}</div><button class="btn small" data-pay="${b.id}">${T.paid}</button>
+    <div style="text-align:right"><div class="amt">${money(b.amount)}</div>${payCell(b)}
     <button class="linkbtn" data-cancelsub="${b.id}">${T.cancelled}</button> <button class="linkbtn" data-edit="sub:${b.id}">${T.edit}</button> ${delBtn("b",b.id)}</div></li>`).join("")}</ul>`:`<p class="empty">${T.noSubs}</p>`}`;
 }
 function viewGastos(){
@@ -965,20 +1038,21 @@ const val=id=>{const el=document.getElementById(id);return el?el.value.trim():""
 document.addEventListener("change",e=>{ if(e.target.dataset.hf!==undefined){hf[e.target.dataset.hf]=e.target.value; return render();} if(e.target.dataset.away) awayChoice[e.target.dataset.away]=e.target.value; if(e.target.id==="wRec"){S.weeklyRecon=e.target.checked; save();} });
 document.addEventListener("click",e=>{
   const el=e.target.closest("button"); if(!el) return; const d=el.dataset;
-  if(d.tab){tab=d.tab;showHow=false;showRecon=false;showCsv=false;showHelp=false;editing=null;confirmDel=null;render();window.scrollTo(0,0);return;}
+  if(d.tab){tab=d.tab;paying=null;showAllRecv=false;showHow=false;showRecon=false;showCsv=false;showHelp=false;editing=null;confirmDel=null;render();window.scrollTo(0,0);return;}
   if(d.quick){const i=document.getElementById("sAmt");i.value=d.quick;i.focus();return;}
   if(d.delSpend) return removeSpend(d.delSpend);
   if(d.mview){mview=d.mview;return render();}
   if(d.moff){moff=Math.max(0,moff+Number(d.moff));return render();}
   if(d.yoff){yoff=Math.max(0,yoff+Number(d.yoff));return render();}
-  if(d.gsub){gsub=d.gsub;editing=null;confirmDel=null;showCsv=false;return render();}
+  if(d.gsub){gsub=d.gsub;paying=null;editing=null;confirmDel=null;showCsv=false;return render();}
   if(d.cancelsub){const b=S.bills.find(x=>x.id===d.cancelsub); if(b){flash=T.cancelSaved(money(b.amount/(b.freq||1)*12)); S.bills=S.bills.filter(x=>x.id!==b.id); save();} return render();}
   if(d.trialkeep){const b=S.bills.find(x=>x.id===d.trialkeep); if(b){delete b.trialEnd; save();} return render();}
   if(d.trialcancel){const b=S.bills.find(x=>x.id===d.trialcancel); if(b){flash=T.cancelSaved(money(b.amount/(b.freq||1)*12)); S.bills=S.bills.filter(x=>x.id!==b.id); save();} return render();}
-  if(d.pay) return payBill(d.pay);
+  if(d.pay){paying=d.pay; render(); const pi=document.getElementById("payAmt"); if(pi){pi.focus(); pi.select();} return;}
   if(d.paydebt) return payDebtMin(d.paydebt);
   if(d.recv) return receiveIncome(d.recv);
   if(d.askDel){confirmDel=d.askDel.replace(":","");return render();}
+  if(d.del&&d.del.startsWith("t:")){confirmDel=null; return undoTx(d.del.slice(2));}
   if(d.del){const [k,id]=d.del.split(":"); if(k==="s"){const sp=S.spends.find(x=>x.id===id); if(sp) adj(sp.amount,sp.acc); S.spends=S.spends.filter(x=>x.id!==id);}
     if(k==="b")S.bills=S.bills.filter(x=>x.id!==id); if(k==="d")S.debts=S.debts.filter(x=>x.id!==id); if(k==="i")S.incomes=S.incomes.filter(x=>x.id!==id);
     if(k==="a"&&S.accounts.length>1){S.accounts=S.accounts.filter(x=>x.id!==id); if(!S.accounts.some(a=>a.spend)) S.accounts[0].spend=true;}
@@ -994,6 +1068,10 @@ document.addEventListener("click",e=>{
     case "n-keep": return resolveNudge(0);
     case "cancel-del": confirmDel=null; return render();
     case "cancel-edit": editing=null; return render();
+    case "pay-cancel": paying=null; return render();
+    case "pay-ok": {const a=num("payAmt"), id=paying; if(!(a>0)){flash=T.invalid;return render();} paying=null; payBill(id,true,a); flash=T.paidMsg; return render();}
+    case "save-tx": {const a=num("tAmt"), dt=val("tDate"); if(!(a>0)||!dt){flash=T.invalid;return render();} editTx(editing.id,a,dt); editing=null; flash=T.savedMsg; return render();}
+    case "recv-all": showAllRecv=!showAllRecv; return render();
     case "log": {const a=num("sAmt"); if(!(a>0)) return; return logSpend(a,val("sCat"),val("sNote"),val("sAcc"));}
     case "save-bill": {
       const n=val("bName"),a=num("bAmt"),f=Number(val("bFreq")),nx=val("bNext");
@@ -1051,7 +1129,7 @@ document.addEventListener("click",e=>{
     case "save-limits": { document.querySelectorAll("[data-limit]").forEach(inp=>{ const v=parseFloat(inp.value); if(v>0) S.limits[inp.dataset.limit]=v; else delete S.limits[inp.dataset.limit]; }); save(); flash=T.savedMsg; return render(); }
     case "save-extra": {const x=num("dExtra"); if(x>=0){S.debtExtra=x;save();} return render();}
     case "extra-pay": {const a=num("xAmt"), id=val("xDebt"), dd=S.debts.find(x=>x.id===id); if(!dd||!(a>0)) return;
-      const p=Math.min(a,dd.balance); dd.balance-=p; adj(-p); S.tx.push({type:"debt",amount:p,name:dd.name,date:todayStr()}); save(); flash=T.savedMsg; return render();}
+      const p=Math.min(a,dd.balance), splits=[]; dd.balance-=p; mover(splits)(-p); pushTx({type:"debt",amount:p,name:dd.name,date:todayStr(),ref:dd.id,splits,balDelta:p}); save(); flash=T.savedMsg; return render();}
     case "away-done": {
       const a=S.away;
       a.bills.forEach(id=>{ (awayChoice["b:"+id]??"yes")==="yes" ? payBill(id,true) : skipBill(id); });
@@ -1075,7 +1153,7 @@ document.addEventListener("click",e=>{
     case "empty": S={...exampleState(S.lang,S.currency),demo:false,accounts:[{id:uid(),name:T.defAcc,balance:0,spend:true}],cushion:0,debtExtra:0,incomes:[],bills:[],debts:[],spends:[],tx:[],limits:{}}; confirmDel=null; save(); tab="ajustes"; return render();
   }
 });
-document.addEventListener("keydown",e=>{ if(e.key==="Enter"&&e.target.id==="sAmt") document.querySelector('[data-act="log"]').click(); });
+document.addEventListener("keydown",e=>{ if(e.key==="Enter"&&e.target.id==="sAmt") document.querySelector('[data-act="log"]').click(); if(e.key==="Enter"&&e.target.id==="payAmt") document.querySelector('[data-act="pay-ok"]').click(); });
 render();
 
 if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}
